@@ -13,7 +13,7 @@
 
 Watch the plugin in action:
 
-https://github.com/user-attachments/assets/3b4685f4-3734-40c6-ba37-32073f9e84c5
+https://github.com/user-attachments/assets/0727b017-f2d6-4ccb-b338-9c28b6f4ef45
 
 ---
 
@@ -37,14 +37,6 @@ https://github.com/user-attachments/assets/3b4685f4-3734-40c6-ba37-32073f9e84c5
 
 - IntelliJ IDEA 2025.1+
 - Karate 1.4.0+
-
-### Installation
-
-1. Go to **Settings > Plugins > Marketplace** in IntelliJ.
-2. Search for **Karate Chop Debugger**.
-3. Click **Install** and restart IntelliJ.
-
-_Or manually install from [Releases](https://github.com/srikanth-iyengar/karate-chop-debugger/releases)._
 
 ---
 
