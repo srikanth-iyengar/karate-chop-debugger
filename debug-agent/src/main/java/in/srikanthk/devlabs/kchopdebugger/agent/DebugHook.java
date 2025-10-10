@@ -34,7 +34,6 @@ public class DebugHook implements RuntimeHook {
 
     @Override
     public void beforeSuite(Suite suite) {
-        // publish state to debugger started
         responsePublisher.updateState(DebuggerState.Started);
     }
 
