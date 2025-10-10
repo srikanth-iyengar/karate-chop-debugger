@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.project.Project
@@ -41,85 +42,84 @@ class KarateExecutionService(val project: Project) {
         project.messageBus.syncPublisher(BreakpointUpdatedTopic.TOPIC)
     val projectBasePath = project.basePath + Constants.JAVA_BASE_PATH
 
-    companion object {
-        // key of filename and breakpoint line
-        val BREAKPOINTS: MutableMap<String, ConcurrentSkipListSet<Int>> = ConcurrentMap();
-    }
+    private val breakpoints: MutableMap<String, ConcurrentSkipListSet<Int>> = ConcurrentMap();
+    private var process: Process? = null
+    private var lastExecutedFileName: String? = null
 
     fun executeSuite(fileName: String) {
+        this.lastExecutedFileName = fileName
         buildMavenProject {
-            val featureClasspath = fileName.substring(projectBasePath.length + 1)
+            ApplicationManager.getApplication().executeOnPooledThread {
+                val featureClasspath = fileName.substring(projectBasePath.length + 1)
 
-            val urls = getMavenDependenciesURL().joinToString(";");
-            val breakpointJson = mapper.writeValueAsString(BREAKPOINTS)
-            val breakpointPath = Files.createTempFile("breakpoints_", ".json")
-            Files.writeString(
-                breakpointPath,
-                breakpointJson,
-                StandardOpenOption.TRUNCATE_EXISTING,
-                StandardOpenOption.CREATE,
-                StandardOpenOption.WRITE
-            )
+                val urls = getMavenDependenciesURL().joinToString(";");
+                val breakpointJson = mapper.writeValueAsString(breakpoints)
+                val breakpointPath = Files.createTempFile("breakpoints_", ".json")
+                Files.writeString(
+                    breakpointPath,
+                    breakpointJson,
+                    StandardOpenOption.TRUNCATE_EXISTING,
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.WRITE
+                )
 
-            val subscriber = createRemoteCallSubscriber();
-            DebugMessageBus.getInstance().subscribe(DebugResponse.TOPIC, subscriber);
+                val subscriber = createRemoteCallSubscriber();
+                DebugMessageBus.getInstance().subscribe(DebugResponse.TOPIC, subscriber);
 
-            val remotePublisher = DebugMessageBus.getInstance().publisher(DebugRequest.TOPIC);
+                val remotePublisher = DebugMessageBus.getInstance().publisher(DebugRequest.TOPIC);
 
-            val messageBus = project.messageBus.connect();
-            messageBus.subscribe(DebuggerInfoRequestTopic.TOPIC, object : DebuggerInfoRequestTopic {
-                override fun publishKarateVariables() {
-                    remotePublisher.publishKarateVariables();
-                }
+                val messageBus = project.messageBus.connect();
+                messageBus.subscribe(DebuggerInfoRequestTopic.TOPIC, object : DebuggerInfoRequestTopic {
+                    override fun publishKarateVariables() {
+                        remotePublisher.publishKarateVariables();
+                    }
 
-                override fun stepForward() {
-                    remotePublisher.stepOver()
-                }
+                    override fun stepForward() {
+                        remotePublisher.stepOver()
+                    }
 
-                override fun resume() {
-                    remotePublisher.resume()
-                }
+                    override fun resume() {
+                        remotePublisher.resume()
+                    }
 
-                override fun evaluateExpression(expression: String) {
-                    remotePublisher.evaluateExpression(expression)
-                }
+                    override fun evaluateExpression(expression: String) {
+                        remotePublisher.evaluateExpression(expression)
+                    }
 
-                override fun addBreakpoint(fileName: String, lineNumber: Int) {
-                    remotePublisher.addBreakpoint(fileName, lineNumber)
-                }
+                    override fun addBreakpoint(fileName: String, lineNumber: Int) {
+                        remotePublisher.addBreakpoint(fileName, lineNumber)
+                    }
 
-                override fun removeBreakpoint(fileName: String, lineNumber: Int) {
-                    remotePublisher.removeBreakpoint(fileName, lineNumber)
-                }
-            })
+                    override fun removeBreakpoint(fileName: String, lineNumber: Int) {
+                        remotePublisher.removeBreakpoint(fileName, lineNumber)
+                    }
+                })
 
-            val debugServer = DebugServer.getInstance().start()
+                val debugServer = DebugServer.getInstance().start()
 
-            val vmOptions = buildString {
-                runPropertiesService?.state?.entries?.forEach { entry ->
-                    append("-D${entry.key}=${entry.value} ")
-                }
-                append("-Ddebug.port=${debugServer.port}")
-            }.trim()
+                val vmOptions = buildString {
+                    runPropertiesService?.state?.entries?.forEach { entry ->
+                        append("-D${entry.key}=${entry.value} ")
+                    }
+                    append("-Ddebug.port=${debugServer.port}")
+                }.trim()
 
-            val command =
-                "${getProjectJavaExecutable(project)} $vmOptions -jar ${getAgentJarFile().path} $featureClasspath ${project.basePath} $breakpointPath $urls"
-            val process =
-                ProcessBuilder(*command.split(" ").toTypedArray())
-                    .redirectError(ProcessBuilder.Redirect.INHERIT)
-                    .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-                    .start();
+                val command =
+                    "${getProjectJavaExecutable(project)} $vmOptions -jar ${getAgentJarFile().path} $featureClasspath ${project.basePath} $breakpointPath $urls"
+                this.process =
+                    ProcessBuilder(*command.split(" ").toTypedArray())
+                        .redirectError(ProcessBuilder.Redirect.INHERIT)
+                        .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                        .start();
 
-            // wait for debug program to complete
-            process.waitFor()
+                process?.waitFor()
 
-            // stop the server
-            debugServer.stop()
-
-            // clear all the message bus subscribers
-            DebugMessageBus.getInstance().clearAll()
-            messageBus.disconnect()
-            Files.deleteIfExists(breakpointPath)
+                debugServer.stop()
+                DebugMessageBus.getInstance().clearAll()
+                messageBus.disconnect()
+                Files.deleteIfExists(breakpointPath)
+                this.process = null
+            }
         }
     }
 
@@ -134,19 +134,28 @@ class KarateExecutionService(val project: Project) {
     }
 
     fun addBreakpoint(file: String, lineNumber: Int) {
-        BREAKPOINTS.computeIfAbsent(file) { ConcurrentSkipListSet() }.add(lineNumber)
+        breakpoints.computeIfAbsent(file) { ConcurrentSkipListSet() }.add(lineNumber)
         breakpointUpdatePublisher?.updatedBreakpoint()
         val remotePublisher = DebugMessageBus.getInstance().publisher(DebugRequest.TOPIC)
         remotePublisher.addBreakpoint(file, lineNumber)
     }
 
     fun removeBreakpoint(file: String, lineNumber: Int) {
-        BREAKPOINTS[file]?.remove(lineNumber)
+        breakpoints[file]?.remove(lineNumber)
         breakpointUpdatePublisher?.updatedBreakpoint()
         val remotePublisher = DebugMessageBus.getInstance().publisher(DebugRequest.TOPIC)
         remotePublisher.removeBreakpoint(file, lineNumber)
     }
 
+    fun stop() {
+        process?.destroyForcibly()
+        process = null
+        responsePublisher.updateState(DebuggerState.Finished)
+    }
+
+    fun rerun() {
+        lastExecutedFileName?.let { executeSuite(it) }
+    }
 
     private fun buildMavenProject(callback: Runnable): Boolean {
         val mavenProjectManager = MavenProjectsManager.getInstance(project);
@@ -197,14 +206,17 @@ class KarateExecutionService(val project: Project) {
 
         val testJarFileName = "$artifactId-$version-tests.jar"
 
-        // Correct and portable file path resolution
         val jarFile = File(File(project.basePath, "target"), testJarFileName)
 
         return jarFile.path.toString()
     }
 
     fun isBreakpointPlaced(file: String, lineNumber: Int): Boolean {
-        return BREAKPOINTS[file]?.contains(lineNumber) ?: false
+        return breakpoints[file]?.contains(lineNumber) ?: false
+    }
+
+    fun getBreakpoints(): Map<String, ConcurrentSkipListSet<Int>> {
+        return breakpoints
     }
 
     fun createRemoteCallSubscriber(): DebugResponse {

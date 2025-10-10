@@ -12,6 +12,8 @@ import java.awt.datatransfer.DataFlavor
 import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
 import javax.swing.*
+import javax.swing.event.TableModelEvent
+import javax.swing.event.TableModelListener
 import javax.swing.table.AbstractTableModel
 
 data class PropertyEntry(var name: String, var value: String)
@@ -35,6 +37,15 @@ class PropertiesEditorPanel : JPanel(BorderLayout()) {
                 saveProperties()
             }
         })
+        tableModel.addTableModelListener { tableModelEvent ->
+            run {
+                when (tableModelEvent.type) {
+                    TableModelEvent.INSERT -> saveProperties()
+                    TableModelEvent.DELETE -> saveProperties()
+                    TableModelEvent.UPDATE -> saveProperties()
+                }
+            }
+        }
 
         val panel = ToolbarDecorator.createDecorator(table)
             .setAddAction {
@@ -46,7 +57,8 @@ class PropertiesEditorPanel : JPanel(BorderLayout()) {
                     tableModel.removeRow(row)
                 }
             }
-            .addExtraAction(object : ToolbarDecorator.ElementActionButton("Paste", null, com.intellij.icons.AllIcons.Actions.MenuPaste) {
+            .addExtraAction(object :
+                ToolbarDecorator.ElementActionButton("Paste", null, com.intellij.icons.AllIcons.Actions.MenuPaste) {
                 override fun actionPerformed(p0: AnActionEvent) {
                     val clipboardText = CopyPasteManager.getInstance()
                         .getContents<String>(DataFlavor.stringFlavor) ?: return
@@ -56,11 +68,6 @@ class PropertiesEditorPanel : JPanel(BorderLayout()) {
                             tableModel.addRow(PropertyEntry(parts[0].trim(), parts[1].trim()))
                         }
                     }
-                }
-            })
-            .addExtraAction(object : ToolbarDecorator.ElementActionButton("Save", null, com.intellij.icons.AllIcons.Actions.MenuSaveall) {
-                override fun actionPerformed(p0: AnActionEvent) {
-                    saveProperties()
                 }
             })
             .createPanel()

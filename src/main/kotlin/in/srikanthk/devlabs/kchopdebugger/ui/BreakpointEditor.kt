@@ -9,7 +9,6 @@ import `in`.srikanthk.devlabs.kchopdebugger.service.KarateExecutionService
 import `in`.srikanthk.devlabs.kchopdebugger.topic.BreakpointUpdatedTopic
 import java.awt.BorderLayout
 import java.io.File
-import java.util.concurrent.ConcurrentSkipListSet
 import javax.swing.JPanel
 import javax.swing.JTree
 import javax.swing.tree.DefaultTreeModel
@@ -19,6 +18,7 @@ class BreakpointEditorPanel(private val project: Project) : JPanel(BorderLayout(
 
     private val root = CheckedTreeNode("Breakpoints")
     private val treeModel = DefaultTreeModel(root)
+    private val karateExecutionService = project.getService(KarateExecutionService::class.java)
     private val tree = object : CheckboxTree(object : CheckboxTree.CheckboxTreeCellRenderer() {
         override fun customizeRenderer(
             tree: JTree,
@@ -72,7 +72,7 @@ class BreakpointEditorPanel(private val project: Project) : JPanel(BorderLayout(
         val fileTree = mutableMapOf<String, MutableMap<String, MutableList<Int>>>()
 
         // Build map like: dir -> file -> lines
-        KarateExecutionService.BREAKPOINTS.forEach { (filePath, lines) ->
+        karateExecutionService.getBreakpoints().forEach { (filePath, lines) ->
             val file = File(filePath)
             val dir = file.parent ?: return@forEach
             val fileName = file.name
@@ -102,14 +102,11 @@ class BreakpointEditorPanel(private val project: Project) : JPanel(BorderLayout(
     }
 
     private fun handleLineToggle(entry: BreakpointEntry) {
-        val breakpoints = KarateExecutionService.BREAKPOINTS
         if (entry.line != null) {
-            val set = breakpoints.getOrPut(entry.path) { ConcurrentSkipListSet() }
-            if (set.contains(entry.line)) {
-                set.remove(entry.line)
-                if (set.isEmpty()) breakpoints.remove(entry.path)
+            if (karateExecutionService.isBreakpointPlaced(entry.path, entry.line)) {
+                karateExecutionService.removeBreakpoint(entry.path, entry.line)
             } else {
-                set.add(entry.line)
+                karateExecutionService.addBreakpoint(entry.path, entry.line)
             }
         }
         expandAll(tree, TreePath(root))
