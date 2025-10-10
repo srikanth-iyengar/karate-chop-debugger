@@ -1,0 +1,19 @@
+// This is a generated file. Not intended for manual editing.
+package in.srikanthk.devlabs.kchopdebugger.language.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface KarateExamples extends PsiElement {
+
+  @NotNull
+  KarateExampleDescription getExampleDescription();
+
+  @NotNull
+  KarateTable getTable();
+
+  @Nullable
+  KarateTags getTags();
+
+}

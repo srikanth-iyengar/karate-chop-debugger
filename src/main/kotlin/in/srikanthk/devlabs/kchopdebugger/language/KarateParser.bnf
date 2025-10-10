@@ -1,0 +1,62 @@
+{
+  parserClass = "in.srikanthk.devlabs.kchopdebugger.language.KarateParser";
+  extends = "com.intellij.extapi.psi.ASTWrapperPsiElement";
+
+  psiClassPrefix = "Karate";
+  psiImplClassSuffix = "Impl";
+  psiPackage = "in.srikanthk.devlabs.kchopdebugger.language.psi";
+  psiImplPackage = "in.srikanthk.devlabs.kchopdebugger.language.psi.impl";
+
+  elementTypeHolderClass = "in.srikanthk.devlabs.kchopdebugger.language.KarateTypes";
+  elementTypeClass = "in.srikanthk.devlabs.kchopdebugger.language.KarateElementType";
+  tokenTypeClass = "in.srikanthk.devlabs.kchopdebugger.language.KarateTokenType";
+}
+
+// -----------------------------------------------------------------------------
+// Root rule
+// -----------------------------------------------------------------------------
+feature ::= featureHeader background? (scenario | scenarioOutline)* NEWLINE? <<eof>>
+
+// -----------------------------------------------------------------------------
+// Header and description
+// -----------------------------------------------------------------------------
+featureHeader ::= featureTags? FEATURE_KEY featureDescription
+
+featureTags ::= FEATURE_TAGS_KEY+
+
+featureDescription ::= description_text*
+
+// -----------------------------------------------------------------------------
+// Background / Scenarios
+// -----------------------------------------------------------------------------
+background ::= BACKGROUND_KEY scenarioDescription step*
+
+scenario ::= tags? SCENARIO_KEY scenarioDescription step*
+
+scenarioOutline ::= tags? SCENARIO_OUTLINE_KEY scenarioDescription step* examples+
+
+examples ::= tags? EXAMPLES_KEY exampleDescription table
+
+// -----------------------------------------------------------------------------
+// Descriptions, steps, tags, doc strings
+// -----------------------------------------------------------------------------
+scenarioDescription ::= description_text*
+
+exampleDescription ::= description_text*
+
+step ::= prefix line (docString | table)?
+
+prefix ::= STAR | GIVEN | WHEN | THEN | AND | BUT
+
+line ::= CHAR+
+
+tags ::= TAGS_KEY+
+
+docString ::= DOC_STRING_KEY
+
+table ::= TABLE_ROW+
+
+// -----------------------------------------------------------------------------
+// Generic reusable rule
+// -----------------------------------------------------------------------------
+description_text ::= !(BACKGROUND_KEY | SCENARIO_KEY | SCENARIO_OUTLINE_KEY | TAGS_KEY | STAR | GIVEN | WHEN | THEN | AND | BUT | EXAMPLES_KEY | TABLE_ROW | DOC_STRING_KEY) CHAR

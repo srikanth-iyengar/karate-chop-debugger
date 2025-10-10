@@ -47,6 +47,9 @@
             <notificationGroup id="Karate Chop Debugger Notification"
                                displayType="BALLOON"
                                isLogByDefault="true"/>
+        <lang.parserDefinition
+                language="karate"
+                implementationClass="in.srikanthk.devlabs.kchopdebugger.language.KarateParserDefinition"/>
     </extensions>
     <projectListeners>
         <listener class="in.srikanthk.devlabs.kchopdebugger.listener.KarateBreakpointListener"

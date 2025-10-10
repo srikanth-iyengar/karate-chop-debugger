@@ -4,4 +4,7 @@ import com.intellij.lang.Language
 
 class KarateLanguage: Language("karate") {
 
+    companion object {
+        val INSTANCE = KarateLanguage()
+    }
 }
