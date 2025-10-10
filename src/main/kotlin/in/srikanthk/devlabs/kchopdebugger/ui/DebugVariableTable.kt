@@ -22,7 +22,6 @@ import javax.swing.table.DefaultTableModel
 class DebugVariableTable(project: Project) : JPanel(BorderLayout()) {
     private val tableModel = DefaultTableModel(arrayOf("Variable", "Type", "Value"), 0);
     private val table = JBTable(tableModel).apply {
-        autoResizeMode = JTable.AUTO_RESIZE_ALL_COLUMNS
     }
     private val objectMapper = ObjectMapper()
     private val expressionField = JBTextField().apply {
