@@ -27,4 +27,16 @@ public class KarateStepImpl extends ASTWrapperPsiElement implements KarateStep {
     else super.accept(visitor);
   }
 
+  @Override
+  @Nullable
+  public KarateComment getComment() {
+    return findChildByClass(KarateComment.class);
+  }
+
+  @Override
+  @NotNull
+  public List<KarateLine> getLineList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, KarateLine.class);
+  }
+
 }

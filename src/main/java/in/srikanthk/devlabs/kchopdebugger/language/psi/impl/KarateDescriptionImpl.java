@@ -11,14 +11,14 @@ import static in.srikanthk.devlabs.kchopdebugger.language.KarateTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import in.srikanthk.devlabs.kchopdebugger.language.psi.*;
 
-public class KarateFeatureDescriptionImpl extends ASTWrapperPsiElement implements KarateFeatureDescription {
+public class KarateDescriptionImpl extends ASTWrapperPsiElement implements KarateDescription {
 
-  public KarateFeatureDescriptionImpl(@NotNull ASTNode node) {
+  public KarateDescriptionImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull KarateVisitor visitor) {
-    visitor.visitFeatureDescription(this);
+    visitor.visitDescription(this);
   }
 
   @Override

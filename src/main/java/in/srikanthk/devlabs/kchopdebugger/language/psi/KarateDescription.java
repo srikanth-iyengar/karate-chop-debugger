@@ -5,10 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface KarateStep extends PsiElement {
-
-  @Nullable
-  KarateComment getComment();
+public interface KarateDescription extends PsiElement {
 
   @NotNull
   List<KarateLine> getLineList();

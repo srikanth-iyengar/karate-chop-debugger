@@ -7,6 +7,7 @@ import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
 
 import static in.srikanthk.devlabs.kchopdebugger.language.KarateTypes.*;
+import com.intellij.psi.TokenType;
 
 
 public class KarateLexer implements FlexLexer {
@@ -101,14 +102,15 @@ public class KarateLexer implements FlexLexer {
   private static final int [] ZZ_ACTION = zzUnpackAction();
 
   private static final String ZZ_ACTION_PACKED_0 =
-    "\4\0\1\1\3\0\1\2\1\1\1\3\3\2\2\4"+
-    "\3\0\1\5\1\6\7\0\1\7\1\10\2\0\2\7"+
-    "\14\0\1\11\1\12\1\0\1\13\5\0\1\14\5\0"+
-    "\1\15\1\16\3\0\1\17\5\0\1\20\7\0\1\21"+
-    "\1\0\1\22\2\0\1\23\6\0\1\24";
+    "\4\0\1\1\1\2\3\1\1\3\1\4\1\2\1\5"+
+    "\2\3\2\6\1\0\2\7\3\0\1\7\1\10\7\0"+
+    "\1\5\1\11\1\12\2\0\2\11\14\0\1\13\1\14"+
+    "\1\0\1\15\5\0\1\16\5\0\1\17\1\20\3\0"+
+    "\1\21\5\0\1\22\7\0\1\23\1\0\1\24\2\0"+
+    "\1\25\6\0\1\26";
 
   private static int [] zzUnpackAction() {
-    int [] result = new int[93];
+    int [] result = new int[98];
     int offset = 0;
     offset = zzUnpackAction(ZZ_ACTION_PACKED_0, offset, result);
     return result;
@@ -134,20 +136,21 @@ public class KarateLexer implements FlexLexer {
 
   private static final String ZZ_ROWMAP_PACKED_0 =
     "\0\0\0\50\0\120\0\170\0\240\0\310\0\360\0\u0118"+
-    "\0\u0140\0\u0168\0\u0190\0\u01b8\0\u01e0\0\u0208\0\50\0\u0230"+
-    "\0\u0258\0\u0280\0\u02a8\0\u02d0\0\50\0\u02f8\0\u0320\0\u0348"+
-    "\0\u0370\0\u0398\0\u03c0\0\u03e8\0\u01b8\0\u01e0\0\u0410\0\u0438"+
-    "\0\50\0\u0460\0\u0488\0\u04b0\0\u04d8\0\u0500\0\u0528\0\u0550"+
-    "\0\u0578\0\u05a0\0\u05c8\0\u05f0\0\u0618\0\u0640\0\50\0\50"+
-    "\0\u0668\0\50\0\u0690\0\u06b8\0\u06e0\0\u0708\0\u0730\0\50"+
-    "\0\u0758\0\u0780\0\u07a8\0\u07d0\0\u07f8\0\50\0\50\0\u0820"+
-    "\0\u0848\0\u0870\0\50\0\u0898\0\u08c0\0\u08e8\0\u0910\0\u0938"+
-    "\0\50\0\u0960\0\u0988\0\u09b0\0\u09d8\0\u0a00\0\u0a28\0\u0a50"+
-    "\0\50\0\u0a78\0\50\0\u0aa0\0\u0ac8\0\50\0\u0af0\0\u0b18"+
-    "\0\u0b40\0\u0b68\0\u0b90\0\u0bb8\0\50";
+    "\0\u0140\0\u0168\0\240\0\u0190\0\u01b8\0\u01e0\0\u0208\0\u0230"+
+    "\0\u0258\0\360\0\240\0\u0280\0\u02a8\0\u02d0\0\u02f8\0\u0320"+
+    "\0\240\0\u0348\0\u0370\0\u0398\0\u03c0\0\u03e8\0\u0410\0\u0438"+
+    "\0\u0460\0\u01e0\0\u0208\0\u0488\0\u04b0\0\240\0\u04d8\0\u0500"+
+    "\0\u0528\0\u0550\0\u0578\0\u05a0\0\u05c8\0\u05f0\0\u0618\0\u0640"+
+    "\0\u0668\0\u0690\0\u06b8\0\240\0\240\0\u06e0\0\240\0\u0708"+
+    "\0\u0730\0\u0758\0\u0780\0\u07a8\0\240\0\u07d0\0\u07f8\0\u0820"+
+    "\0\u0848\0\u0870\0\240\0\240\0\u0898\0\u08c0\0\u08e8\0\240"+
+    "\0\u0910\0\u0938\0\u0960\0\u0988\0\u09b0\0\240\0\u09d8\0\u0a00"+
+    "\0\u0a28\0\u0a50\0\u0a78\0\u0aa0\0\u0ac8\0\240\0\u0af0\0\240"+
+    "\0\u0b18\0\u0b40\0\240\0\u0b68\0\u0b90\0\u0bb8\0\u0be0\0\u0c08"+
+    "\0\u0c30\0\240";
 
   private static int [] zzUnpackRowMap() {
-    int [] result = new int[93];
+    int [] result = new int[98];
     int offset = 0;
     offset = zzUnpackRowMap(ZZ_ROWMAP_PACKED_0, offset, result);
     return result;
@@ -170,38 +173,40 @@ public class KarateLexer implements FlexLexer {
   private static final int [] ZZ_TRANS = zzUnpacktrans();
 
   private static final String ZZ_TRANS_PACKED_0 =
-    "\2\0\1\5\1\0\1\5\2\0\1\6\2\0\1\7"+
-    "\3\0\1\10\101\0\2\11\1\12\1\11\1\12\2\11"+
-    "\1\13\2\11\1\14\34\11\1\15\2\11\1\16\1\11"+
-    "\1\16\43\11\2\0\1\5\1\0\1\5\43\0\2\6"+
-    "\1\17\1\6\1\20\43\6\2\21\1\0\1\21\1\0"+
-    "\43\21\27\0\1\22\20\0\2\11\1\0\1\11\1\0"+
-    "\43\11\1\0\2\12\1\0\2\12\1\23\1\24\1\25"+
-    "\2\0\1\26\1\27\1\30\1\0\1\31\1\0\1\32"+
-    "\1\33\1\34\24\0\2\13\1\0\1\11\1\0\43\13"+
-    "\2\35\1\0\1\35\1\0\43\35\2\36\1\0\1\36"+
-    "\1\0\43\36\1\0\1\37\1\16\1\0\1\16\1\37"+
-    "\1\40\43\0\1\17\45\0\2\21\1\41\1\21\1\42"+
-    "\43\21\24\0\1\43\31\0\1\44\41\0\2\24\1\0"+
-    "\1\24\1\0\43\24\36\0\1\45\35\0\1\46\17\0"+
-    "\1\47\51\0\1\50\33\0\1\51\42\0\1\52\53\0"+
-    "\1\53\47\0\1\54\17\0\2\37\1\0\2\37\1\40"+
-    "\47\0\1\55\43\0\1\41\110\0\1\56\12\0\1\57"+
-    "\67\0\1\60\46\0\1\61\65\0\1\62\30\0\1\63"+
-    "\70\0\1\64\31\0\1\65\47\0\1\66\47\0\1\67"+
-    "\26\0\1\70\105\0\1\71\36\0\1\72\51\0\1\73"+
-    "\41\0\1\74\56\0\1\75\47\0\1\76\47\0\1\77"+
-    "\52\0\1\100\36\0\1\101\57\0\1\102\45\0\1\103"+
-    "\35\0\1\104\52\0\1\105\61\0\1\106\42\0\1\107"+
-    "\54\0\1\110\17\0\1\111\75\0\1\112\37\0\1\113"+
-    "\52\0\1\114\61\0\1\115\45\0\1\116\44\0\1\117"+
-    "\46\0\1\120\22\0\1\121\43\0\1\122\3\0\1\123"+
-    "\64\0\1\124\41\0\1\125\40\0\1\126\102\0\1\127"+
-    "\46\0\1\130\40\0\1\131\45\0\1\132\53\0\1\133"+
-    "\40\0\1\134\31\0\1\135\36\0";
+    "\2\5\1\6\1\5\1\6\2\5\1\7\2\5\1\10"+
+    "\3\5\1\11\101\5\1\12\1\13\1\14\1\12\1\14"+
+    "\1\13\1\12\1\15\2\12\1\16\34\12\1\17\2\20"+
+    "\1\21\1\20\1\21\43\20\52\0\1\6\1\0\1\6"+
+    "\43\0\2\22\1\23\1\22\1\24\43\22\2\25\1\0"+
+    "\1\25\1\0\43\25\27\0\1\26\20\0\1\12\2\0"+
+    "\1\12\2\0\42\12\1\0\2\14\1\0\2\14\1\27"+
+    "\1\30\1\31\2\0\1\32\1\33\1\34\1\0\1\35"+
+    "\1\0\1\36\1\37\1\40\24\0\1\15\1\41\1\0"+
+    "\1\12\1\0\1\41\42\15\2\42\1\0\1\42\1\0"+
+    "\43\42\2\43\1\0\1\43\1\0\43\43\2\20\1\0"+
+    "\1\20\1\0\43\20\1\0\1\44\1\21\1\0\1\21"+
+    "\1\44\1\45\43\0\1\23\45\0\2\25\1\46\1\25"+
+    "\1\47\43\25\24\0\1\50\31\0\1\51\41\0\2\30"+
+    "\1\0\1\30\1\0\43\30\36\0\1\52\35\0\1\53"+
+    "\17\0\1\54\51\0\1\55\33\0\1\56\42\0\1\57"+
+    "\53\0\1\60\47\0\1\61\16\0\2\41\3\0\43\41"+
+    "\1\0\2\44\1\0\2\44\1\45\47\0\1\62\43\0"+
+    "\1\46\110\0\1\63\12\0\1\64\67\0\1\65\46\0"+
+    "\1\66\65\0\1\67\30\0\1\70\70\0\1\71\31\0"+
+    "\1\72\47\0\1\73\47\0\1\74\26\0\1\75\105\0"+
+    "\1\76\36\0\1\77\51\0\1\100\41\0\1\101\56\0"+
+    "\1\102\47\0\1\103\47\0\1\104\52\0\1\105\36\0"+
+    "\1\106\57\0\1\107\45\0\1\110\35\0\1\111\52\0"+
+    "\1\112\61\0\1\113\42\0\1\114\54\0\1\115\17\0"+
+    "\1\116\75\0\1\117\37\0\1\120\52\0\1\121\61\0"+
+    "\1\122\45\0\1\123\44\0\1\124\46\0\1\125\22\0"+
+    "\1\126\43\0\1\127\3\0\1\130\64\0\1\131\41\0"+
+    "\1\132\40\0\1\133\102\0\1\134\46\0\1\135\40\0"+
+    "\1\136\45\0\1\137\53\0\1\140\40\0\1\141\31\0"+
+    "\1\142\36\0";
 
   private static int [] zzUnpacktrans() {
-    int [] result = new int[3040];
+    int [] result = new int[3160];
     int offset = 0;
     offset = zzUnpacktrans(ZZ_TRANS_PACKED_0, offset, result);
     return result;
@@ -239,14 +244,14 @@ public class KarateLexer implements FlexLexer {
   private static final int [] ZZ_ATTRIBUTE = zzUnpackAttribute();
 
   private static final String ZZ_ATTRIBUTE_PACKED_0 =
-    "\1\0\1\10\2\0\1\1\3\0\6\1\1\11\1\1"+
-    "\3\0\1\1\1\11\7\0\2\1\2\0\1\11\1\1"+
+    "\4\0\1\11\5\1\1\11\6\1\1\0\1\11\1\1"+
+    "\3\0\1\1\1\11\7\0\3\1\2\0\1\11\1\1"+
     "\14\0\2\11\1\0\1\11\5\0\1\11\5\0\2\11"+
     "\3\0\1\11\5\0\1\11\7\0\1\11\1\0\1\11"+
     "\2\0\1\11\6\0\1\11";
 
   private static int [] zzUnpackAttribute() {
-    int [] result = new int[93];
+    int [] result = new int[98];
     int offset = 0;
     offset = zzUnpackAttribute(ZZ_ATTRIBUTE_PACKED_0, offset, result);
     return result;
@@ -314,9 +319,10 @@ public class KarateLexer implements FlexLexer {
   private boolean zzEOFDone;
 
   /* user code: */
-  public KarateLexer() {
-    this((java.io.Reader) null);
-  }
+    private StringBuilder stringBuffer = new StringBuilder();
+    public KarateLexer() {
+      this((java.io.Reader) null);
+    }
 
 
   /**
@@ -561,105 +567,122 @@ public class KarateLexer implements FlexLexer {
       else {
         switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
           case 1:
-            { return NEWLINE;
-            }
-          // fall through
-          case 21: break;
-          case 2:
-            { return TEXT;
-            }
-          // fall through
-          case 22: break;
-          case 3:
-            { /* ignore comment */
+            { return TokenType.BAD_CHARACTER;
             }
           // fall through
           case 23: break;
-          case 4:
-            { return COMMENT_STMT;
+          case 2:
+            { return NEWLINE;
             }
           // fall through
           case 24: break;
-          case 5:
-            { 
+          case 3:
+            { return WORD_KEY;
             }
           // fall through
           case 25: break;
-          case 6:
-            { return STAR_STEP;
+          case 4:
+            { return WS_KEY;
             }
           // fall through
           case 26: break;
-          case 7:
-            { return TAGS_KEY;
+          case 5:
+            { /* ignore comment */
             }
           // fall through
           case 27: break;
-          case 8:
-            { return TABLE_ROW;
+          case 6:
+            { this.stringBuffer.append(yytext());
             }
           // fall through
           case 28: break;
-          case 9:
-            { yybegin(DOC_STRING_BLOCK); return DOC_STRING_KEY;
+          case 7:
+            { return COMMENT_STMT;
             }
           // fall through
           case 29: break;
-          case 10:
-            { return AND_STEP;
+          case 8:
+            { return STAR_STEP;
             }
           // fall through
           case 30: break;
-          case 11:
-            { return BUT_STEP;
+          case 9:
+            { return TAGS_KEY;
             }
           // fall through
           case 31: break;
-          case 12:
-            { yybegin(WAITING_VALUE); return DOC_STRING_KEY;
+          case 10:
+            { return TABLE_ROW;
             }
           // fall through
           case 32: break;
-          case 13:
-            { return THEN_STEP;
+          case 11:
+            { yybegin(DOC_STRING_BLOCK);
             }
           // fall through
           case 33: break;
-          case 14:
-            { return WHEN_STEP;
+          case 12:
+            { return AND_STEP;
             }
           // fall through
           case 34: break;
-          case 15:
-            { return GIVEN_STEP;
+          case 13:
+            { return BUT_STEP;
             }
           // fall through
           case 35: break;
-          case 16:
-            { yybegin(WAITING_VALUE); return FEATURE_KEYWORD;
+          case 14:
+            { String text = this.stringBuffer.toString();
+                  this.stringBuffer.setLength(0); // clear buffer
+                  yybegin(WAITING_VALUE);
+                  if (!text.isEmpty()) {
+                      return DOC_STRING_KEY; // return accumulated doc string content
+                  } else {
+                      return WORD; // handle empty doc string
+                  }
             }
           // fall through
           case 36: break;
-          case 17:
-            { return EXAMPLES_KEYWORD;
+          case 15:
+            { return THEN_STEP;
             }
           // fall through
           case 37: break;
-          case 18:
-            { return SCENARIO_KEYWORD;
+          case 16:
+            { return WHEN_STEP;
             }
           // fall through
           case 38: break;
-          case 19:
-            { return BACKGROUND_KEYWORD;
+          case 17:
+            { return GIVEN_STEP;
             }
           // fall through
           case 39: break;
-          case 20:
-            { return SCENARIO_OUTLINE_KEYWORD;
+          case 18:
+            { yybegin(WAITING_VALUE); return FEATURE_KEYWORD;
             }
           // fall through
           case 40: break;
+          case 19:
+            { return EXAMPLES_KEYWORD;
+            }
+          // fall through
+          case 41: break;
+          case 20:
+            { return SCENARIO_KEYWORD;
+            }
+          // fall through
+          case 42: break;
+          case 21:
+            { return BACKGROUND_KEYWORD;
+            }
+          // fall through
+          case 43: break;
+          case 22:
+            { return SCENARIO_OUTLINE_KEYWORD;
+            }
+          // fall through
+          case 44: break;
           default:
             zzScanError(ZZ_NO_MATCH);
           }

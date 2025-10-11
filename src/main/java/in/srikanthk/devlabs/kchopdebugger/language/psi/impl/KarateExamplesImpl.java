@@ -28,6 +28,12 @@ public class KarateExamplesImpl extends ASTWrapperPsiElement implements KarateEx
   }
 
   @Override
+  @Nullable
+  public KarateComment getComment() {
+    return findChildByClass(KarateComment.class);
+  }
+
+  @Override
   @NotNull
   public List<KarateTable> getTableList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, KarateTable.class);

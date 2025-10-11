@@ -7,6 +7,9 @@ import com.intellij.psi.PsiElement;
 
 public interface KarateExamples extends PsiElement {
 
+  @Nullable
+  KarateComment getComment();
+
   @NotNull
   List<KarateTable> getTableList();
 

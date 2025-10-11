@@ -7,4 +7,7 @@ import com.intellij.psi.PsiElement;
 
 public interface KarateLine extends PsiElement {
 
+  @NotNull
+  List<KarateWord> getWordList();
+
 }

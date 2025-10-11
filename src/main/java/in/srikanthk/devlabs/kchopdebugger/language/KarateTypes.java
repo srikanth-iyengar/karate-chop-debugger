@@ -10,15 +10,16 @@ public interface KarateTypes {
 
   IElementType BACKGROUND = new KarateElementType("BACKGROUND");
   IElementType COMMENT = new KarateElementType("COMMENT");
+  IElementType DESCRIPTION = new KarateElementType("DESCRIPTION");
   IElementType DOC_STRING = new KarateElementType("DOC_STRING");
   IElementType EXAMPLES = new KarateElementType("EXAMPLES");
-  IElementType FEATURE_DESCRIPTION = new KarateElementType("FEATURE_DESCRIPTION");
   IElementType LINE = new KarateElementType("LINE");
   IElementType SCENARIO = new KarateElementType("SCENARIO");
   IElementType SCENARIO_OUTLINE = new KarateElementType("SCENARIO_OUTLINE");
   IElementType STEP = new KarateElementType("STEP");
   IElementType TABLE = new KarateElementType("TABLE");
   IElementType TAGS = new KarateElementType("TAGS");
+  IElementType WORD = new KarateElementType("WORD");
 
   IElementType AND_STEP = new KarateTokenType("AND_STEP");
   IElementType BACKGROUND_KEYWORD = new KarateTokenType("BACKGROUND_KEYWORD");
@@ -34,9 +35,10 @@ public interface KarateTypes {
   IElementType STAR_STEP = new KarateTokenType("STAR_STEP");
   IElementType TABLE_ROW = new KarateTokenType("TABLE_ROW");
   IElementType TAGS_KEY = new KarateTokenType("TAGS_KEY");
-  IElementType TEXT = new KarateTokenType("TEXT");
   IElementType THEN_STEP = new KarateTokenType("THEN_STEP");
   IElementType WHEN_STEP = new KarateTokenType("WHEN_STEP");
+  IElementType WORD_KEY = new KarateTokenType("WORD_KEY");
+  IElementType WS_KEY = new KarateTokenType("WS_KEY");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
@@ -47,14 +49,14 @@ public interface KarateTypes {
       else if (type == COMMENT) {
         return new KarateCommentImpl(node);
       }
+      else if (type == DESCRIPTION) {
+        return new KarateDescriptionImpl(node);
+      }
       else if (type == DOC_STRING) {
         return new KarateDocStringImpl(node);
       }
       else if (type == EXAMPLES) {
         return new KarateExamplesImpl(node);
-      }
-      else if (type == FEATURE_DESCRIPTION) {
-        return new KarateFeatureDescriptionImpl(node);
       }
       else if (type == LINE) {
         return new KarateLineImpl(node);
@@ -73,6 +75,9 @@ public interface KarateTypes {
       }
       else if (type == TAGS) {
         return new KarateTagsImpl(node);
+      }
+      else if (type == WORD) {
+        return new KarateWordImpl(node);
       }
       throw new AssertionError("Unknown element type: " + type);
     }

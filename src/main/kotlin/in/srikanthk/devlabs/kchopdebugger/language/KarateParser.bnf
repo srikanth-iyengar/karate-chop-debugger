@@ -12,26 +12,28 @@
   tokenTypeClass = "in.srikanthk.devlabs.kchopdebugger.language.KarateTokenType";
 }
 
-feature ::= tags? FEATURE_KEYWORD feature_description? background? (scenario | scenario_outline)* NEWLINE*
+feature ::= (comment|tags)* FEATURE_KEYWORD description? background? (scenario | scenario_outline)* NEWLINE*
 
-feature_description ::= line+
+comment ::= COMMENT_STMT
 
-line ::= NEWLINE? TEXT+
+description ::= line+
 
-comment ::= COMMENT_STMT NEWLINE
+line ::= NEWLINE? (word | WS_KEY)+
 
 tags ::= NEWLINE? TAGS_KEY+
 
-background ::= tags? BACKGROUND_KEYWORD TEXT* (step | doc_string | table)*
+background ::= (comment|tags)* BACKGROUND_KEYWORD description* (step | doc_string | table)*
 
-step ::= (STAR_STEP | GIVEN_STEP | WHEN_STEP | THEN_STEP | AND_STEP | BUT_STEP) TEXT*
+step ::= comment? (STAR_STEP | GIVEN_STEP | WHEN_STEP | THEN_STEP | AND_STEP | BUT_STEP) line*
 
-scenario ::= tags? SCENARIO_KEYWORD TEXT* (step | doc_string | table)*
+scenario ::= (comment|tags)* SCENARIO_KEYWORD description? (step | doc_string | table)*
 
-scenario_outline ::= tags? SCENARIO_OUTLINE_KEYWORD TEXT* (step | doc_string | table)* examples
+scenario_outline ::= (comment|tags)* SCENARIO_OUTLINE_KEYWORD description? (step | doc_string | table)* examples
 
-examples ::= EXAMPLES_KEYWORD table*
+examples ::= comment? EXAMPLES_KEYWORD table*
 
 table    ::= NEWLINE? TABLE_ROW+
 
-doc_string ::= DOC_STRING_KEY TEXT* DOC_STRING_KEY
+doc_string ::= comment? DOC_STRING_KEY
+
+word ::= WORD_KEY

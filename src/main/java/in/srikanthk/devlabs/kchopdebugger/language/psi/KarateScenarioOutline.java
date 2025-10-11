@@ -8,6 +8,12 @@ import com.intellij.psi.PsiElement;
 public interface KarateScenarioOutline extends PsiElement {
 
   @NotNull
+  List<KarateComment> getCommentList();
+
+  @Nullable
+  KarateDescription getDescription();
+
+  @NotNull
   List<KarateDocString> getDocStringList();
 
   @NotNull
@@ -19,7 +25,7 @@ public interface KarateScenarioOutline extends PsiElement {
   @NotNull
   List<KarateTable> getTableList();
 
-  @Nullable
-  KarateTags getTags();
+  @NotNull
+  List<KarateTags> getTagsList();
 
 }

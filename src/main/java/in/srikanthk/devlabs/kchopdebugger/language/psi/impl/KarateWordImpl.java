@@ -11,26 +11,20 @@ import static in.srikanthk.devlabs.kchopdebugger.language.KarateTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import in.srikanthk.devlabs.kchopdebugger.language.psi.*;
 
-public class KarateDocStringImpl extends ASTWrapperPsiElement implements KarateDocString {
+public class KarateWordImpl extends ASTWrapperPsiElement implements KarateWord {
 
-  public KarateDocStringImpl(@NotNull ASTNode node) {
+  public KarateWordImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull KarateVisitor visitor) {
-    visitor.visitDocString(this);
+    visitor.visitWord(this);
   }
 
   @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof KarateVisitor) accept((KarateVisitor)visitor);
     else super.accept(visitor);
-  }
-
-  @Override
-  @Nullable
-  public KarateComment getComment() {
-    return findChildByClass(KarateComment.class);
   }
 
 }

@@ -27,4 +27,10 @@ public class KarateLineImpl extends ASTWrapperPsiElement implements KarateLine {
     else super.accept(visitor);
   }
 
+  @Override
+  @NotNull
+  public List<KarateWord> getWordList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, KarateWord.class);
+  }
+
 }

@@ -15,15 +15,15 @@ public class KarateVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitDescription(@NotNull KarateDescription o) {
+    visitPsiElement(o);
+  }
+
   public void visitDocString(@NotNull KarateDocString o) {
     visitPsiElement(o);
   }
 
   public void visitExamples(@NotNull KarateExamples o) {
-    visitPsiElement(o);
-  }
-
-  public void visitFeatureDescription(@NotNull KarateFeatureDescription o) {
     visitPsiElement(o);
   }
 
@@ -48,6 +48,10 @@ public class KarateVisitor extends PsiElementVisitor {
   }
 
   public void visitTags(@NotNull KarateTags o) {
+    visitPsiElement(o);
+  }
+
+  public void visitWord(@NotNull KarateWord o) {
     visitPsiElement(o);
   }
 
