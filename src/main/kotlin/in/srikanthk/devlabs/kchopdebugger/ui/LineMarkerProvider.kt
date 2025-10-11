@@ -36,6 +36,6 @@ class KarateLineMarkerProvider : LineMarkerProvider {
         val lineNumber = document.getLineNumber(element.textOffset) + 1;
         val filepath = element.containingFile.virtualFile.path;
         val karateExecutionService = element.project.getService(KarateExecutionService::class.java)
-        return karateExecutionService.isBreakpointPlaced(filepath, lineNumber) && (element.elementType.toString() == "STEP_KEYWORD");
+        return karateExecutionService.isBreakpointPlaced(filepath, lineNumber) && (element.elementType.toString() == "LINE");
     }
 }

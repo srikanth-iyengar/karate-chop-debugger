@@ -62,6 +62,7 @@ class KarateStepAnnotator : Annotator {
                         if (text.trim(' ', '\t') in karateTypes) {
                             highlight(holder, secondPsi.textRange, DefaultLanguageHighlighterColors.INSTANCE_FIELD)
                         }
+                        return
                     }
                     if(text.toDoubleOrNull() != null) {
                         highlight(holder, secondPsi.textRange, DefaultLanguageHighlighterColors.NUMBER)
