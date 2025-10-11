@@ -29,8 +29,8 @@ public class KarateFeatureDescriptionImpl extends ASTWrapperPsiElement implement
 
   @Override
   @NotNull
-  public List<KarateDescriptionText> getDescriptionTextList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, KarateDescriptionText.class);
+  public List<KarateLine> getLineList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, KarateLine.class);
   }
 
 }

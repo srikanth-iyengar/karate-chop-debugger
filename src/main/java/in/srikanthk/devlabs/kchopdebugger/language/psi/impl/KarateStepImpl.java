@@ -27,28 +27,4 @@ public class KarateStepImpl extends ASTWrapperPsiElement implements KarateStep {
     else super.accept(visitor);
   }
 
-  @Override
-  @Nullable
-  public KarateDocString getDocString() {
-    return findChildByClass(KarateDocString.class);
-  }
-
-  @Override
-  @NotNull
-  public KarateLine getLine() {
-    return findNotNullChildByClass(KarateLine.class);
-  }
-
-  @Override
-  @NotNull
-  public KaratePrefix getPrefix() {
-    return findNotNullChildByClass(KaratePrefix.class);
-  }
-
-  @Override
-  @Nullable
-  public KarateTable getTable() {
-    return findChildByClass(KarateTable.class);
-  }
-
 }

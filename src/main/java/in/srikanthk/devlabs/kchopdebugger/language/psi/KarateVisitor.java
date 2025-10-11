@@ -11,15 +11,11 @@ public class KarateVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitDescriptionText(@NotNull KarateDescriptionText o) {
+  public void visitComment(@NotNull KarateComment o) {
     visitPsiElement(o);
   }
 
   public void visitDocString(@NotNull KarateDocString o) {
-    visitPsiElement(o);
-  }
-
-  public void visitExampleDescription(@NotNull KarateExampleDescription o) {
     visitPsiElement(o);
   }
 
@@ -31,27 +27,11 @@ public class KarateVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitFeatureHeader(@NotNull KarateFeatureHeader o) {
-    visitPsiElement(o);
-  }
-
-  public void visitFeatureTags(@NotNull KarateFeatureTags o) {
-    visitPsiElement(o);
-  }
-
   public void visitLine(@NotNull KarateLine o) {
     visitPsiElement(o);
   }
 
-  public void visitPrefix(@NotNull KaratePrefix o) {
-    visitPsiElement(o);
-  }
-
   public void visitScenario(@NotNull KarateScenario o) {
-    visitPsiElement(o);
-  }
-
-  public void visitScenarioDescription(@NotNull KarateScenarioDescription o) {
     visitPsiElement(o);
   }
 

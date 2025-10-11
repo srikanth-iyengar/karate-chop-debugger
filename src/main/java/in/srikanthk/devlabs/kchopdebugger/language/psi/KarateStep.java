@@ -7,16 +7,4 @@ import com.intellij.psi.PsiElement;
 
 public interface KarateStep extends PsiElement {
 
-  @Nullable
-  KarateDocString getDocString();
-
-  @NotNull
-  KarateLine getLine();
-
-  @NotNull
-  KaratePrefix getPrefix();
-
-  @Nullable
-  KarateTable getTable();
-
 }

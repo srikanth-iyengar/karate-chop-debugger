@@ -8,9 +8,15 @@ import com.intellij.psi.PsiElement;
 public interface KarateBackground extends PsiElement {
 
   @NotNull
-  KarateScenarioDescription getScenarioDescription();
+  List<KarateDocString> getDocStringList();
 
   @NotNull
   List<KarateStep> getStepList();
+
+  @NotNull
+  List<KarateTable> getTableList();
+
+  @Nullable
+  KarateTags getTags();
 
 }

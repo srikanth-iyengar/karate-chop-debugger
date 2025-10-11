@@ -12,51 +12,26 @@
   tokenTypeClass = "in.srikanthk.devlabs.kchopdebugger.language.KarateTokenType";
 }
 
-// -----------------------------------------------------------------------------
-// Root rule
-// -----------------------------------------------------------------------------
-feature ::= featureHeader background? (scenario | scenarioOutline)* NEWLINE? <<eof>>
+feature ::= tags? FEATURE_KEYWORD feature_description? background? (scenario | scenario_outline)* NEWLINE*
 
-// -----------------------------------------------------------------------------
-// Header and description
-// -----------------------------------------------------------------------------
-featureHeader ::= featureTags? FEATURE_KEY featureDescription
+feature_description ::= line+
 
-featureTags ::= FEATURE_TAGS_KEY+
+line ::= NEWLINE? TEXT+
 
-featureDescription ::= description_text*
+comment ::= COMMENT_STMT NEWLINE
 
-// -----------------------------------------------------------------------------
-// Background / Scenarios
-// -----------------------------------------------------------------------------
-background ::= BACKGROUND_KEY scenarioDescription step*
+tags ::= NEWLINE? TAGS_KEY+
 
-scenario ::= tags? SCENARIO_KEY scenarioDescription step*
+background ::= tags? BACKGROUND_KEYWORD TEXT* (step | doc_string | table)*
 
-scenarioOutline ::= tags? SCENARIO_OUTLINE_KEY scenarioDescription step* examples+
+step ::= (STAR_STEP | GIVEN_STEP | WHEN_STEP | THEN_STEP | AND_STEP | BUT_STEP) TEXT*
 
-examples ::= tags? EXAMPLES_KEY exampleDescription table
+scenario ::= tags? SCENARIO_KEYWORD TEXT* (step | doc_string | table)*
 
-// -----------------------------------------------------------------------------
-// Descriptions, steps, tags, doc strings
-// -----------------------------------------------------------------------------
-scenarioDescription ::= description_text*
+scenario_outline ::= tags? SCENARIO_OUTLINE_KEYWORD TEXT* (step | doc_string | table)* examples
 
-exampleDescription ::= description_text*
+examples ::= EXAMPLES_KEYWORD table*
 
-step ::= prefix line (docString | table)?
+table    ::= NEWLINE? TABLE_ROW+
 
-prefix ::= STAR | GIVEN | WHEN | THEN | AND | BUT
-
-line ::= CHAR+
-
-tags ::= TAGS_KEY+
-
-docString ::= DOC_STRING_KEY
-
-table ::= TABLE_ROW+
-
-// -----------------------------------------------------------------------------
-// Generic reusable rule
-// -----------------------------------------------------------------------------
-description_text ::= !(BACKGROUND_KEY | SCENARIO_KEY | SCENARIO_OUTLINE_KEY | TAGS_KEY | STAR | GIVEN | WHEN | THEN | AND | BUT | EXAMPLES_KEY | TABLE_ROW | DOC_STRING_KEY) CHAR
+doc_string ::= DOC_STRING_KEY TEXT* DOC_STRING_KEY

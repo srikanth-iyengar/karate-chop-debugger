@@ -29,20 +29,8 @@ public class KarateExamplesImpl extends ASTWrapperPsiElement implements KarateEx
 
   @Override
   @NotNull
-  public KarateExampleDescription getExampleDescription() {
-    return findNotNullChildByClass(KarateExampleDescription.class);
-  }
-
-  @Override
-  @NotNull
-  public KarateTable getTable() {
-    return findNotNullChildByClass(KarateTable.class);
-  }
-
-  @Override
-  @Nullable
-  public KarateTags getTags() {
-    return findChildByClass(KarateTags.class);
+  public List<KarateTable> getTableList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, KarateTable.class);
   }
 
 }

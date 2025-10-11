@@ -7,11 +7,13 @@ import com.intellij.openapi.util.NlsSafe
 import org.jetbrains.annotations.NonNls
 import javax.swing.Icon
 
-class KarateLanguageFileType : LanguageFileType {
-    constructor() : super(LANG_INSTANCE) {
+class KarateLanguageFileType : LanguageFileType(KarateLanguage.INSTANCE) {
+    companion object {
+        val INSTANCE = KarateLanguageFileType()
     }
+
     override fun getName(): @NonNls String {
-        return "Karate"
+        return "Karate DSL"
     }
 
     override fun getDescription(): @NlsContexts.Label String {
@@ -23,11 +25,6 @@ class KarateLanguageFileType : LanguageFileType {
     }
 
     override fun getIcon(): Icon? {
-        return AllIcons.FileTypes.Text
-    }
-
-    companion object {
-        val LANG_INSTANCE = KarateLanguage();
-        val INSTANCE = KarateLanguageFileType()
+        return AllIcons.FileTypes.Regexp
     }
 }

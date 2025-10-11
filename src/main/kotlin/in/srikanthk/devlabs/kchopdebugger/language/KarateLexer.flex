@@ -2,69 +2,73 @@ package in.srikanthk.devlabs.kchopdebugger.language;
 
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
-import com.intellij.psi.TokenType;
 
 import static in.srikanthk.devlabs.kchopdebugger.language.KarateTypes.*;
 
 %%
 
+%{
+  public KarateLexer() {
+    this((java.io.Reader) null);
+  }
+%}
+
+%public
 %class KarateLexer
 %implements FlexLexer
-%unicode
 %function advance
 %type IElementType
-%ignorecase
+%unicode
+%state MAIN
 
-%eof{
-    return;
-%eof}
+// --- Regex fragments ---
+WS = [ \t]
+LF = \r|\n|\r\n
+BOL = {LF}+{WS}*
+CHAR = [^\r\n]
 
-/* ---------------------- Regular Expressions ---------------------- */
-
-EOL             = \r|\n|\r\n
-WS              = [ \t\f]+
-
-FEATURE         = "Feature:"
-BACKGROUND      = "Background:"
-SCENARIO        = "Scenario:"
-SCENARIO_OUTLINE= "Scenario Outline:"
-EXAMPLES        = "Examples:"
-TAG             = \@[A-Za-z0-9_\-]+
-GIVEN           = "Given"
-WHEN            = "When"
-THEN            = "Then"
-AND             = "And"
-BUT             = "But"
-
-
-DOCSTRING_START = "\"\"\""
-TABLE_CELL      = \| [^\r\n]*
-
-TEXT            = [^ \t\r\n#\|@\"]([^\r\n]*)?
+%state WAITING_VALUE
+%state DOC_STRING_BLOCK
 
 %%
 
-<YYINITIAL>{
+<YYINITIAL> {
+  "#" {CHAR}* {LF}                             { return COMMENT_STMT; }
+  "@" {CHAR}+ {LF}                             { return TAGS_KEY; }
 
-    {FEATURE}               { return FEATURE_KEY; }
-    {BACKGROUND}            { return BACKGROUND_KEY; }
-    {SCENARIO_OUTLINE}      { return SCENARIO_OUTLINE_KEY; }
-    {SCENARIO}              { return SCENARIO_KEY; }
-    {EXAMPLES}              { return EXAMPLES_KEY; }
+  "Feature:"                                   { yybegin(WAITING_VALUE); return FEATURE_KEYWORD; }
 
-    {GIVEN}                 { return GIVEN; }
-    {WHEN}                  { return WHEN; }
-    {THEN}                  { return THEN; }
-    {AND}                   { return AND; }
-    {BUT}                   { return BUT; }
+  {LF}+                                        { return NEWLINE; }
 
-    {TAG}                   { return TAGS_KEY; }
+}
 
-    {DOCSTRING_START}       { return DOC_STRING_KEY; }
-    {TABLE_CELL}            { return TABLE_ROW; }
+<WAITING_VALUE> {
+  "#".*                                      { /* ignore comment */ }
+  {BOL}+"\"\"\""                             { yybegin(DOC_STRING_BLOCK); return DOC_STRING_KEY; }
 
-    {EOL}                   { return NEWLINE; }
-    {WS}                    { return TokenType.WHITE_SPACE; }
+  "|" {CHAR}+                                 { return TABLE_ROW; }
+  {BOL}+ "Background:"                        { return BACKGROUND_KEYWORD; }
+  {BOL}+ "Scenario:"                          { return SCENARIO_KEYWORD; }
+  {BOL}+ "Scenario Outline:"                  { return SCENARIO_OUTLINE_KEYWORD; }
+  {BOL}+ "Examples:"                          { return EXAMPLES_KEYWORD; }
 
-    .                       { return TokenType.BAD_CHARACTER; }
+  {BOL}+ "*"                                  { return STAR_STEP; }
+  {BOL}+ "Given"                              { return GIVEN_STEP; }
+  {BOL}+ "When"                               { return WHEN_STEP; }
+  {BOL}+ "Then"                               { return THEN_STEP; }
+  {BOL}+ "And"                                { return AND_STEP; }
+  {BOL}+ "But"                                { return BUT_STEP; }
+  {BOL}+ "#" {CHAR}*                          {  }
+
+  "@" {CHAR}+                                 { return TAGS_KEY; }
+  {CHAR}+                                     { return TEXT; }
+
+  {BOL}+                                      { return NEWLINE; }
+}
+
+<DOC_STRING_BLOCK> {
+    {BOL}+"\"\"\""                                  { yybegin(WAITING_VALUE); return DOC_STRING_KEY; }
+    {CHAR}+ { return TEXT; }
+    {WS}+ {return TEXT;}
+    {LF}+ {return TEXT;}
 }

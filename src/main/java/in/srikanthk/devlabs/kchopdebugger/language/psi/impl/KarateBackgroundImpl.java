@@ -29,14 +29,26 @@ public class KarateBackgroundImpl extends ASTWrapperPsiElement implements Karate
 
   @Override
   @NotNull
-  public KarateScenarioDescription getScenarioDescription() {
-    return findNotNullChildByClass(KarateScenarioDescription.class);
+  public List<KarateDocString> getDocStringList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, KarateDocString.class);
   }
 
   @Override
   @NotNull
   public List<KarateStep> getStepList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, KarateStep.class);
+  }
+
+  @Override
+  @NotNull
+  public List<KarateTable> getTableList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, KarateTable.class);
+  }
+
+  @Override
+  @Nullable
+  public KarateTags getTags() {
+    return findChildByClass(KarateTags.class);
   }
 
 }

@@ -8,12 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface KarateExamples extends PsiElement {
 
   @NotNull
-  KarateExampleDescription getExampleDescription();
-
-  @NotNull
-  KarateTable getTable();
-
-  @Nullable
-  KarateTags getTags();
+  List<KarateTable> getTableList();
 
 }

@@ -29,20 +29,26 @@ public class KarateScenarioOutlineImpl extends ASTWrapperPsiElement implements K
 
   @Override
   @NotNull
-  public List<KarateExamples> getExamplesList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, KarateExamples.class);
+  public List<KarateDocString> getDocStringList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, KarateDocString.class);
   }
 
   @Override
   @NotNull
-  public KarateScenarioDescription getScenarioDescription() {
-    return findNotNullChildByClass(KarateScenarioDescription.class);
+  public KarateExamples getExamples() {
+    return findNotNullChildByClass(KarateExamples.class);
   }
 
   @Override
   @NotNull
   public List<KarateStep> getStepList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, KarateStep.class);
+  }
+
+  @Override
+  @NotNull
+  public List<KarateTable> getTableList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, KarateTable.class);
   }
 
   @Override

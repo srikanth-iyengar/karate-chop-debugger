@@ -8,6 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface KarateFeatureDescription extends PsiElement {
 
   @NotNull
-  List<KarateDescriptionText> getDescriptionTextList();
+  List<KarateLine> getLineList();
 
 }

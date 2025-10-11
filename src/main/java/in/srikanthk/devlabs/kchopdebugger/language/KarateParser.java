@@ -36,266 +36,248 @@ public class KarateParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // BACKGROUND_KEY scenarioDescription step*
+  // tags? BACKGROUND_KEYWORD TEXT* (step | doc_string | table)*
   public static boolean background(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "background")) return false;
-    if (!nextTokenIs(b, BACKGROUND_KEY)) return false;
     boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, BACKGROUND_KEY);
-    r = r && scenarioDescription(b, l + 1);
+    Marker m = enter_section_(b, l, _NONE_, BACKGROUND, "<background>");
+    r = background_0(b, l + 1);
+    r = r && consumeToken(b, BACKGROUND_KEYWORD);
     r = r && background_2(b, l + 1);
-    exit_section_(b, m, BACKGROUND, r);
-    return r;
-  }
-
-  // step*
-  private static boolean background_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "background_2")) return false;
-    while (true) {
-      int c = current_position_(b);
-      if (!step(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "background_2", c)) break;
-    }
-    return true;
-  }
-
-  /* ********************************************************** */
-  // !(BACKGROUND_KEY | SCENARIO_KEY | SCENARIO_OUTLINE_KEY | TAGS_KEY | STAR | GIVEN | WHEN | THEN | AND | BUT | EXAMPLES_KEY | TABLE_ROW | DOC_STRING_KEY) CHAR
-  public static boolean description_text(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "description_text")) return false;
-    if (!nextTokenIs(b, CHAR)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = description_text_0(b, l + 1);
-    r = r && consumeToken(b, CHAR);
-    exit_section_(b, m, DESCRIPTION_TEXT, r);
-    return r;
-  }
-
-  // !(BACKGROUND_KEY | SCENARIO_KEY | SCENARIO_OUTLINE_KEY | TAGS_KEY | STAR | GIVEN | WHEN | THEN | AND | BUT | EXAMPLES_KEY | TABLE_ROW | DOC_STRING_KEY)
-  private static boolean description_text_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "description_text_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NOT_);
-    r = !description_text_0_0(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
-    return r;
-  }
-
-  // BACKGROUND_KEY | SCENARIO_KEY | SCENARIO_OUTLINE_KEY | TAGS_KEY | STAR | GIVEN | WHEN | THEN | AND | BUT | EXAMPLES_KEY | TABLE_ROW | DOC_STRING_KEY
-  private static boolean description_text_0_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "description_text_0_0")) return false;
-    boolean r;
-    r = consumeToken(b, BACKGROUND_KEY);
-    if (!r) r = consumeToken(b, SCENARIO_KEY);
-    if (!r) r = consumeToken(b, SCENARIO_OUTLINE_KEY);
-    if (!r) r = consumeToken(b, TAGS_KEY);
-    if (!r) r = consumeToken(b, STAR);
-    if (!r) r = consumeToken(b, GIVEN);
-    if (!r) r = consumeToken(b, WHEN);
-    if (!r) r = consumeToken(b, THEN);
-    if (!r) r = consumeToken(b, AND);
-    if (!r) r = consumeToken(b, BUT);
-    if (!r) r = consumeToken(b, EXAMPLES_KEY);
-    if (!r) r = consumeToken(b, TABLE_ROW);
-    if (!r) r = consumeToken(b, DOC_STRING_KEY);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // DOC_STRING_KEY
-  public static boolean docString(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "docString")) return false;
-    if (!nextTokenIs(b, DOC_STRING_KEY)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, DOC_STRING_KEY);
-    exit_section_(b, m, DOC_STRING, r);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // description_text*
-  public static boolean exampleDescription(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "exampleDescription")) return false;
-    Marker m = enter_section_(b, l, _NONE_, EXAMPLE_DESCRIPTION, "<example description>");
-    while (true) {
-      int c = current_position_(b);
-      if (!description_text(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "exampleDescription", c)) break;
-    }
-    exit_section_(b, l, m, true, false, null);
-    return true;
-  }
-
-  /* ********************************************************** */
-  // tags? EXAMPLES_KEY exampleDescription table
-  public static boolean examples(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "examples")) return false;
-    if (!nextTokenIs(b, "<examples>", EXAMPLES_KEY, TAGS_KEY)) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, EXAMPLES, "<examples>");
-    r = examples_0(b, l + 1);
-    r = r && consumeToken(b, EXAMPLES_KEY);
-    r = r && exampleDescription(b, l + 1);
-    r = r && table(b, l + 1);
+    r = r && background_3(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
 
   // tags?
-  private static boolean examples_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "examples_0")) return false;
+  private static boolean background_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "background_0")) return false;
     tags(b, l + 1);
     return true;
   }
 
+  // TEXT*
+  private static boolean background_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "background_2")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!consumeToken(b, TEXT)) break;
+      if (!empty_element_parsed_guard_(b, "background_2", c)) break;
+    }
+    return true;
+  }
+
+  // (step | doc_string | table)*
+  private static boolean background_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "background_3")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!background_3_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "background_3", c)) break;
+    }
+    return true;
+  }
+
+  // step | doc_string | table
+  private static boolean background_3_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "background_3_0")) return false;
+    boolean r;
+    r = step(b, l + 1);
+    if (!r) r = doc_string(b, l + 1);
+    if (!r) r = table(b, l + 1);
+    return r;
+  }
+
   /* ********************************************************** */
-  // featureHeader background? (scenario | scenarioOutline)* NEWLINE? <<eof>>
-  static boolean feature(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "feature")) return false;
-    if (!nextTokenIs(b, "", FEATURE_KEY, FEATURE_TAGS_KEY)) return false;
+  // COMMENT_STMT NEWLINE
+  public static boolean comment(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "comment")) return false;
+    if (!nextTokenIs(b, COMMENT_STMT)) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = featureHeader(b, l + 1);
-    r = r && feature_1(b, l + 1);
+    r = consumeTokens(b, 0, COMMENT_STMT, NEWLINE);
+    exit_section_(b, m, COMMENT, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // DOC_STRING_KEY TEXT* DOC_STRING_KEY
+  public static boolean doc_string(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "doc_string")) return false;
+    if (!nextTokenIs(b, DOC_STRING_KEY)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, DOC_STRING_KEY);
+    r = r && doc_string_1(b, l + 1);
+    r = r && consumeToken(b, DOC_STRING_KEY);
+    exit_section_(b, m, DOC_STRING, r);
+    return r;
+  }
+
+  // TEXT*
+  private static boolean doc_string_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "doc_string_1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!consumeToken(b, TEXT)) break;
+      if (!empty_element_parsed_guard_(b, "doc_string_1", c)) break;
+    }
+    return true;
+  }
+
+  /* ********************************************************** */
+  // EXAMPLES_KEYWORD table*
+  public static boolean examples(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "examples")) return false;
+    if (!nextTokenIs(b, EXAMPLES_KEYWORD)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, EXAMPLES_KEYWORD);
+    r = r && examples_1(b, l + 1);
+    exit_section_(b, m, EXAMPLES, r);
+    return r;
+  }
+
+  // table*
+  private static boolean examples_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "examples_1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!table(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "examples_1", c)) break;
+    }
+    return true;
+  }
+
+  /* ********************************************************** */
+  // tags? FEATURE_KEYWORD feature_description? background? (scenario | scenario_outline)* NEWLINE*
+  static boolean feature(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "feature")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = feature_0(b, l + 1);
+    r = r && consumeToken(b, FEATURE_KEYWORD);
     r = r && feature_2(b, l + 1);
     r = r && feature_3(b, l + 1);
-    r = r && eof(b, l + 1);
+    r = r && feature_4(b, l + 1);
+    r = r && feature_5(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
 
+  // tags?
+  private static boolean feature_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "feature_0")) return false;
+    tags(b, l + 1);
+    return true;
+  }
+
+  // feature_description?
+  private static boolean feature_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "feature_2")) return false;
+    feature_description(b, l + 1);
+    return true;
+  }
+
   // background?
-  private static boolean feature_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "feature_1")) return false;
+  private static boolean feature_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "feature_3")) return false;
     background(b, l + 1);
     return true;
   }
 
-  // (scenario | scenarioOutline)*
-  private static boolean feature_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "feature_2")) return false;
+  // (scenario | scenario_outline)*
+  private static boolean feature_4(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "feature_4")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!feature_2_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "feature_2", c)) break;
+      if (!feature_4_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "feature_4", c)) break;
     }
     return true;
   }
 
-  // scenario | scenarioOutline
-  private static boolean feature_2_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "feature_2_0")) return false;
+  // scenario | scenario_outline
+  private static boolean feature_4_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "feature_4_0")) return false;
     boolean r;
     r = scenario(b, l + 1);
-    if (!r) r = scenarioOutline(b, l + 1);
+    if (!r) r = scenario_outline(b, l + 1);
+    return r;
+  }
+
+  // NEWLINE*
+  private static boolean feature_5(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "feature_5")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!consumeToken(b, NEWLINE)) break;
+      if (!empty_element_parsed_guard_(b, "feature_5", c)) break;
+    }
+    return true;
+  }
+
+  /* ********************************************************** */
+  // line+
+  public static boolean feature_description(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "feature_description")) return false;
+    if (!nextTokenIs(b, "<feature description>", NEWLINE, TEXT)) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, FEATURE_DESCRIPTION, "<feature description>");
+    r = line(b, l + 1);
+    while (r) {
+      int c = current_position_(b);
+      if (!line(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "feature_description", c)) break;
+    }
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // NEWLINE? TEXT+
+  public static boolean line(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "line")) return false;
+    if (!nextTokenIs(b, "<line>", NEWLINE, TEXT)) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, LINE, "<line>");
+    r = line_0(b, l + 1);
+    r = r && line_1(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
   // NEWLINE?
-  private static boolean feature_3(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "feature_3")) return false;
+  private static boolean line_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "line_0")) return false;
     consumeToken(b, NEWLINE);
     return true;
   }
 
-  /* ********************************************************** */
-  // description_text*
-  public static boolean featureDescription(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "featureDescription")) return false;
-    Marker m = enter_section_(b, l, _NONE_, FEATURE_DESCRIPTION, "<feature description>");
-    while (true) {
-      int c = current_position_(b);
-      if (!description_text(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "featureDescription", c)) break;
-    }
-    exit_section_(b, l, m, true, false, null);
-    return true;
-  }
-
-  /* ********************************************************** */
-  // featureTags? FEATURE_KEY featureDescription
-  public static boolean featureHeader(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "featureHeader")) return false;
-    if (!nextTokenIs(b, "<feature header>", FEATURE_KEY, FEATURE_TAGS_KEY)) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, FEATURE_HEADER, "<feature header>");
-    r = featureHeader_0(b, l + 1);
-    r = r && consumeToken(b, FEATURE_KEY);
-    r = r && featureDescription(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
-    return r;
-  }
-
-  // featureTags?
-  private static boolean featureHeader_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "featureHeader_0")) return false;
-    featureTags(b, l + 1);
-    return true;
-  }
-
-  /* ********************************************************** */
-  // FEATURE_TAGS_KEY+
-  public static boolean featureTags(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "featureTags")) return false;
-    if (!nextTokenIs(b, FEATURE_TAGS_KEY)) return false;
+  // TEXT+
+  private static boolean line_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "line_1")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeToken(b, FEATURE_TAGS_KEY);
+    r = consumeToken(b, TEXT);
     while (r) {
       int c = current_position_(b);
-      if (!consumeToken(b, FEATURE_TAGS_KEY)) break;
-      if (!empty_element_parsed_guard_(b, "featureTags", c)) break;
+      if (!consumeToken(b, TEXT)) break;
+      if (!empty_element_parsed_guard_(b, "line_1", c)) break;
     }
-    exit_section_(b, m, FEATURE_TAGS, r);
+    exit_section_(b, m, null, r);
     return r;
   }
 
   /* ********************************************************** */
-  // CHAR+
-  public static boolean line(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "line")) return false;
-    if (!nextTokenIs(b, CHAR)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, CHAR);
-    while (r) {
-      int c = current_position_(b);
-      if (!consumeToken(b, CHAR)) break;
-      if (!empty_element_parsed_guard_(b, "line", c)) break;
-    }
-    exit_section_(b, m, LINE, r);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // STAR | GIVEN | WHEN | THEN | AND | BUT
-  public static boolean prefix(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "prefix")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, PREFIX, "<prefix>");
-    r = consumeToken(b, STAR);
-    if (!r) r = consumeToken(b, GIVEN);
-    if (!r) r = consumeToken(b, WHEN);
-    if (!r) r = consumeToken(b, THEN);
-    if (!r) r = consumeToken(b, AND);
-    if (!r) r = consumeToken(b, BUT);
-    exit_section_(b, l, m, r, false, null);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // tags? SCENARIO_KEY scenarioDescription step*
+  // tags? SCENARIO_KEYWORD TEXT* (step | doc_string | table)*
   public static boolean scenario(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "scenario")) return false;
-    if (!nextTokenIs(b, "<scenario>", SCENARIO_KEY, TAGS_KEY)) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, SCENARIO, "<scenario>");
     r = scenario_0(b, l + 1);
-    r = r && consumeToken(b, SCENARIO_KEY);
-    r = r && scenarioDescription(b, l + 1);
+    r = r && consumeToken(b, SCENARIO_KEYWORD);
+    r = r && scenario_2(b, l + 1);
     r = r && scenario_3(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
@@ -308,140 +290,195 @@ public class KarateParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // step*
+  // TEXT*
+  private static boolean scenario_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "scenario_2")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!consumeToken(b, TEXT)) break;
+      if (!empty_element_parsed_guard_(b, "scenario_2", c)) break;
+    }
+    return true;
+  }
+
+  // (step | doc_string | table)*
   private static boolean scenario_3(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "scenario_3")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!step(b, l + 1)) break;
+      if (!scenario_3_0(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "scenario_3", c)) break;
     }
     return true;
   }
 
-  /* ********************************************************** */
-  // description_text*
-  public static boolean scenarioDescription(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "scenarioDescription")) return false;
-    Marker m = enter_section_(b, l, _NONE_, SCENARIO_DESCRIPTION, "<scenario description>");
-    while (true) {
-      int c = current_position_(b);
-      if (!description_text(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "scenarioDescription", c)) break;
-    }
-    exit_section_(b, l, m, true, false, null);
-    return true;
-  }
-
-  /* ********************************************************** */
-  // tags? SCENARIO_OUTLINE_KEY scenarioDescription step* examples+
-  public static boolean scenarioOutline(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "scenarioOutline")) return false;
-    if (!nextTokenIs(b, "<scenario outline>", SCENARIO_OUTLINE_KEY, TAGS_KEY)) return false;
+  // step | doc_string | table
+  private static boolean scenario_3_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "scenario_3_0")) return false;
     boolean r;
-    Marker m = enter_section_(b, l, _NONE_, SCENARIO_OUTLINE, "<scenario outline>");
-    r = scenarioOutline_0(b, l + 1);
-    r = r && consumeToken(b, SCENARIO_OUTLINE_KEY);
-    r = r && scenarioDescription(b, l + 1);
-    r = r && scenarioOutline_3(b, l + 1);
-    r = r && scenarioOutline_4(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
-    return r;
-  }
-
-  // tags?
-  private static boolean scenarioOutline_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "scenarioOutline_0")) return false;
-    tags(b, l + 1);
-    return true;
-  }
-
-  // step*
-  private static boolean scenarioOutline_3(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "scenarioOutline_3")) return false;
-    while (true) {
-      int c = current_position_(b);
-      if (!step(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "scenarioOutline_3", c)) break;
-    }
-    return true;
-  }
-
-  // examples+
-  private static boolean scenarioOutline_4(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "scenarioOutline_4")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = examples(b, l + 1);
-    while (r) {
-      int c = current_position_(b);
-      if (!examples(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "scenarioOutline_4", c)) break;
-    }
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // prefix line (docString | table)?
-  public static boolean step(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "step")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, STEP, "<step>");
-    r = prefix(b, l + 1);
-    r = r && line(b, l + 1);
-    r = r && step_2(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
-    return r;
-  }
-
-  // (docString | table)?
-  private static boolean step_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "step_2")) return false;
-    step_2_0(b, l + 1);
-    return true;
-  }
-
-  // docString | table
-  private static boolean step_2_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "step_2_0")) return false;
-    boolean r;
-    r = docString(b, l + 1);
+    r = step(b, l + 1);
+    if (!r) r = doc_string(b, l + 1);
     if (!r) r = table(b, l + 1);
     return r;
   }
 
   /* ********************************************************** */
-  // TABLE_ROW+
+  // tags? SCENARIO_OUTLINE_KEYWORD TEXT* (step | doc_string | table)* examples
+  public static boolean scenario_outline(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "scenario_outline")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, SCENARIO_OUTLINE, "<scenario outline>");
+    r = scenario_outline_0(b, l + 1);
+    r = r && consumeToken(b, SCENARIO_OUTLINE_KEYWORD);
+    r = r && scenario_outline_2(b, l + 1);
+    r = r && scenario_outline_3(b, l + 1);
+    r = r && examples(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // tags?
+  private static boolean scenario_outline_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "scenario_outline_0")) return false;
+    tags(b, l + 1);
+    return true;
+  }
+
+  // TEXT*
+  private static boolean scenario_outline_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "scenario_outline_2")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!consumeToken(b, TEXT)) break;
+      if (!empty_element_parsed_guard_(b, "scenario_outline_2", c)) break;
+    }
+    return true;
+  }
+
+  // (step | doc_string | table)*
+  private static boolean scenario_outline_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "scenario_outline_3")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!scenario_outline_3_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "scenario_outline_3", c)) break;
+    }
+    return true;
+  }
+
+  // step | doc_string | table
+  private static boolean scenario_outline_3_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "scenario_outline_3_0")) return false;
+    boolean r;
+    r = step(b, l + 1);
+    if (!r) r = doc_string(b, l + 1);
+    if (!r) r = table(b, l + 1);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // (STAR_STEP | GIVEN_STEP | WHEN_STEP | THEN_STEP | AND_STEP | BUT_STEP) TEXT*
+  public static boolean step(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "step")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, STEP, "<step>");
+    r = step_0(b, l + 1);
+    r = r && step_1(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // STAR_STEP | GIVEN_STEP | WHEN_STEP | THEN_STEP | AND_STEP | BUT_STEP
+  private static boolean step_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "step_0")) return false;
+    boolean r;
+    r = consumeToken(b, STAR_STEP);
+    if (!r) r = consumeToken(b, GIVEN_STEP);
+    if (!r) r = consumeToken(b, WHEN_STEP);
+    if (!r) r = consumeToken(b, THEN_STEP);
+    if (!r) r = consumeToken(b, AND_STEP);
+    if (!r) r = consumeToken(b, BUT_STEP);
+    return r;
+  }
+
+  // TEXT*
+  private static boolean step_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "step_1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!consumeToken(b, TEXT)) break;
+      if (!empty_element_parsed_guard_(b, "step_1", c)) break;
+    }
+    return true;
+  }
+
+  /* ********************************************************** */
+  // NEWLINE? TABLE_ROW+
   public static boolean table(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "table")) return false;
-    if (!nextTokenIs(b, TABLE_ROW)) return false;
+    if (!nextTokenIs(b, "<table>", NEWLINE, TABLE_ROW)) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, TABLE, "<table>");
+    r = table_0(b, l + 1);
+    r = r && table_1(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // NEWLINE?
+  private static boolean table_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "table_0")) return false;
+    consumeToken(b, NEWLINE);
+    return true;
+  }
+
+  // TABLE_ROW+
+  private static boolean table_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "table_1")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, TABLE_ROW);
     while (r) {
       int c = current_position_(b);
       if (!consumeToken(b, TABLE_ROW)) break;
-      if (!empty_element_parsed_guard_(b, "table", c)) break;
+      if (!empty_element_parsed_guard_(b, "table_1", c)) break;
     }
-    exit_section_(b, m, TABLE, r);
+    exit_section_(b, m, null, r);
     return r;
   }
 
   /* ********************************************************** */
-  // TAGS_KEY+
+  // NEWLINE? TAGS_KEY+
   public static boolean tags(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "tags")) return false;
-    if (!nextTokenIs(b, TAGS_KEY)) return false;
+    if (!nextTokenIs(b, "<tags>", NEWLINE, TAGS_KEY)) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, TAGS, "<tags>");
+    r = tags_0(b, l + 1);
+    r = r && tags_1(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // NEWLINE?
+  private static boolean tags_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "tags_0")) return false;
+    consumeToken(b, NEWLINE);
+    return true;
+  }
+
+  // TAGS_KEY+
+  private static boolean tags_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "tags_1")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, TAGS_KEY);
     while (r) {
       int c = current_position_(b);
       if (!consumeToken(b, TAGS_KEY)) break;
-      if (!empty_element_parsed_guard_(b, "tags", c)) break;
+      if (!empty_element_parsed_guard_(b, "tags_1", c)) break;
     }
-    exit_section_(b, m, TAGS, r);
+    exit_section_(b, m, null, r);
     return r;
   }
 

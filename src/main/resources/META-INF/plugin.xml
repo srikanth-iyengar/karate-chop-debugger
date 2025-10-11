@@ -47,8 +47,13 @@
             <notificationGroup id="Karate Chop Debugger Notification"
                                displayType="BALLOON"
                                isLogByDefault="true"/>
+        <fileType name="Karate DSL"
+                  implementationClass="in.srikanthk.devlabs.kchopdebugger.language.KarateLanguageFileType"
+                  fieldName="INSTANCE"
+                  language="karate-dsl"
+                  extensions="feature"/>
         <lang.parserDefinition
-                language="karate"
+                language="karate-dsl"
                 implementationClass="in.srikanthk.devlabs.kchopdebugger.language.KarateParserDefinition"/>
     </extensions>
     <projectListeners>
