@@ -58,8 +58,8 @@
         <lang.syntaxHighlighterFactory
                 language="karate-dsl"
                 implementationClass="in.srikanthk.devlabs.kchopdebugger.language.KarateSyntaxHighlighterFactory"/>
-<!--        <multiHostInjector-->
-<!--                implementation="in.srikanthk.devlabs.kchopdebugger.language.annotator.injector.KarateDocStringInjector"/>-->
+        <multiHostInjector
+                implementation="in.srikanthk.devlabs.kchopdebugger.language.annotator.injector.KarateDocStringInjector"/>
         <annotator language="karate-dsl"
                    implementationClass="in.srikanthk.devlabs.kchopdebugger.language.annotator.DocStringAnnotator"
         />

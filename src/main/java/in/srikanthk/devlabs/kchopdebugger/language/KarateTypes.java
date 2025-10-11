@@ -11,6 +11,7 @@ public interface KarateTypes {
   IElementType BACKGROUND = new KarateElementType("BACKGROUND");
   IElementType COMMENT = new KarateElementType("COMMENT");
   IElementType DESCRIPTION = new KarateElementType("DESCRIPTION");
+  IElementType DOC_CONTENT = new KarateElementType("DOC_CONTENT");
   IElementType DOC_STRING = new KarateElementType("DOC_STRING");
   IElementType EXAMPLES = new KarateElementType("EXAMPLES");
   IElementType LINE = new KarateElementType("LINE");
@@ -25,7 +26,9 @@ public interface KarateTypes {
   IElementType BACKGROUND_KEYWORD = new KarateTokenType("BACKGROUND_KEYWORD");
   IElementType BUT_STEP = new KarateTokenType("BUT_STEP");
   IElementType COMMENT_STMT = new KarateTokenType("COMMENT_STMT");
-  IElementType DOC_STRING_KEY = new KarateTokenType("DOC_STRING_KEY");
+  IElementType DOC_STRING_CONTENT = new KarateTokenType("DOC_STRING_CONTENT");
+  IElementType DOC_STRING_END = new KarateTokenType("DOC_STRING_END");
+  IElementType DOC_STRING_START = new KarateTokenType("DOC_STRING_START");
   IElementType EXAMPLES_KEYWORD = new KarateTokenType("EXAMPLES_KEYWORD");
   IElementType FEATURE_KEYWORD = new KarateTokenType("FEATURE_KEYWORD");
   IElementType GIVEN_STEP = new KarateTokenType("GIVEN_STEP");
@@ -51,6 +54,9 @@ public interface KarateTypes {
       }
       else if (type == DESCRIPTION) {
         return new KarateDescriptionImpl(node);
+      }
+      else if (type == DOC_CONTENT) {
+        return new KarateDocContentImpl(node);
       }
       else if (type == DOC_STRING) {
         return new KarateDocStringImpl(node);

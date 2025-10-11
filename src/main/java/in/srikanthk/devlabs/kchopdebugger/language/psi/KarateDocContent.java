@@ -5,12 +5,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface KarateDocString extends PsiElement {
-
-  @Nullable
-  KarateComment getComment();
-
-  @NotNull
-  KarateDocContent getDocContent();
+public interface KarateDocContent extends PsiElement {
 
 }

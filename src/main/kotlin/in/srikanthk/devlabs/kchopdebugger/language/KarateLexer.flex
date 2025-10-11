@@ -47,7 +47,7 @@ WORD_NON_WS = [^ \t\r\n]
 
 <WAITING_VALUE> {
   "#".*                                      { /* ignore comment */ }
-  {BOL}+"\"\"\""                             { yybegin(DOC_STRING_BLOCK); }
+  {BOL}+"\"\"\""                             { yybegin(DOC_STRING_BLOCK); return DOC_STRING_START; }
 
   "|" {CHAR}+                                 { return TABLE_ROW; }
   {BOL}+ "Background:"                        { return BACKGROUND_KEYWORD; }
@@ -73,18 +73,10 @@ WORD_NON_WS = [^ \t\r\n]
 
 <DOC_STRING_BLOCK> {
     {BOL}+"\"\"\""                                  {
-                  String text = this.stringBuffer.toString();
-                  this.stringBuffer.setLength(0); // clear buffer
                   yybegin(WAITING_VALUE);
-                  if (!text.isEmpty()) {
-                      return DOC_STRING_KEY; // return accumulated doc string content
-                  } else {
-                      return WORD; // handle empty doc string
-                  }
+                  return DOC_STRING_END;
     }
-    {CHAR}+ { this.stringBuffer.append(yytext()); }
-    {WS}+ { this.stringBuffer.append(yytext()); }
-    {LF}+ { this.stringBuffer.append(yytext()); }
+    [^]           { return DOC_STRING_CONTENT; }
 }
 
 

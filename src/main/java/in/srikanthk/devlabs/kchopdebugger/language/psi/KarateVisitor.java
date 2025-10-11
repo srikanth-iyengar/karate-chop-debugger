@@ -19,6 +19,10 @@ public class KarateVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitDocContent(@NotNull KarateDocContent o) {
+    visitPsiElement(o);
+  }
+
   public void visitDocString(@NotNull KarateDocString o) {
     visitPsiElement(o);
   }

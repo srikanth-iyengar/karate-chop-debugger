@@ -34,6 +34,8 @@ examples ::= comment? EXAMPLES_KEYWORD table*
 
 table    ::= NEWLINE? TABLE_ROW+
 
-doc_string ::= comment? DOC_STRING_KEY
+doc_string ::= comment? DOC_STRING_START doc_content DOC_STRING_END
+
+doc_content ::= DOC_STRING_CONTENT*
 
 word ::= WORD_KEY

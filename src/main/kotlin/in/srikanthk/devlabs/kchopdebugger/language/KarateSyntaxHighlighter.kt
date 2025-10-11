@@ -56,7 +56,6 @@ class KarateSyntaxHighlighter : SyntaxHighlighterBase() {
             KarateTypes.WORD -> arrayOf(STRING)
             KarateTypes.COMMENT_STMT -> arrayOf(COMMENT)
             KarateTypes.TAGS_KEY -> arrayOf(TAG)
-            KarateTypes.DOC_STRING_KEY -> arrayOf(STRING)
             KarateTypes.TABLE_ROW -> arrayOf(TABLE_ROW)
             else -> emptyArray()
         }

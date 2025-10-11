@@ -21,15 +21,6 @@ class DocStringAnnotator : Annotator {
 
         val node = element.node
 
-        // Highlight the triple quote delimiters
-        node.getChildren(null).filter { it.elementType == KarateTypes.DOC_STRING_KEY }
-            .forEach { quoteNode ->
-                holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
-                    .range(quoteNode.textRange)
-                    .textAttributes(DOC_STRING_DELIMITER)
-                    .create()
-            }
-
         // Highlight the content text inside the doc string
         node.getChildren(null).filter { it.elementType == KarateTypes.WORD }
             .forEach { textNode ->

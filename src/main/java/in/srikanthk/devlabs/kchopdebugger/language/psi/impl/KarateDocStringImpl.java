@@ -33,4 +33,10 @@ public class KarateDocStringImpl extends ASTWrapperPsiElement implements KarateD
     return findChildByClass(KarateComment.class);
   }
 
+  @Override
+  @NotNull
+  public KarateDocContent getDocContent() {
+    return findNotNullChildByClass(KarateDocContent.class);
+  }
+
 }

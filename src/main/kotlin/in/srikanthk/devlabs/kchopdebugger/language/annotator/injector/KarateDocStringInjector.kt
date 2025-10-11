@@ -7,28 +7,17 @@ import com.intellij.lang.xml.XMLLanguage
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLanguageInjectionHost
-import `in`.srikanthk.devlabs.kchopdebugger.language.psi.KarateDocString
-import `in`.srikanthk.devlabs.kchopdebugger.language.psi.impl.KarateDocStringImpl
+import `in`.srikanthk.devlabs.kchopdebugger.language.psi.impl.KarateDocContentImpl
 
 
 class KarateDocStringInjector : MultiHostInjector {
 
     override fun getLanguagesToInject(registrar: MultiHostRegistrar, host: PsiElement) {
-        if (host !is KarateDocStringImpl) return
+        if (host !is KarateDocContentImpl) return
 
         val text = host.text
 
-        // Find the content inside the triple quotes
-        val start = text.indexOf("\"\"\"") + 3 // skip opening """
-        val end = text.lastIndexOf("\"\"\"") // before closing """
-
-        if (start >= end) return  // empty content
-
-
-        val endDiff = text.length - end
-        val rangeInsideHost = TextRange(host.textRange.startOffset + start, host.textRange.endOffset - endDiff)
-
-        val content = text.substring(start, end).trim { it <= ' ' }
+        val content = text.trim { it <= ' ' }
         var language: Language? = null
         if (content.startsWith("{") && content.endsWith("}")) {
             language = com.intellij.json.JsonLanguage.INSTANCE
@@ -38,12 +27,12 @@ class KarateDocStringInjector : MultiHostInjector {
 
         if (language != null) {
             registrar.startInjecting(language)
-            registrar.addPlace(null, null, host as PsiLanguageInjectionHost, rangeInsideHost)
+            registrar.addPlace(null, null, host as PsiLanguageInjectionHost, TextRange(0, host.textLength))
             registrar.doneInjecting()
         }
     }
 
     override fun elementsToInjectIn(): List<Class<out PsiElement>> {
-        return listOf(KarateDocString::class.java)
+        return listOf(KarateDocContentImpl::class.java)
     }
 }

@@ -130,14 +130,30 @@ public class KarateParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // comment? DOC_STRING_KEY
+  // DOC_STRING_CONTENT*
+  public static boolean doc_content(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "doc_content")) return false;
+    Marker m = enter_section_(b, l, _NONE_, DOC_CONTENT, "<doc content>");
+    while (true) {
+      int c = current_position_(b);
+      if (!consumeToken(b, DOC_STRING_CONTENT)) break;
+      if (!empty_element_parsed_guard_(b, "doc_content", c)) break;
+    }
+    exit_section_(b, l, m, true, false, null);
+    return true;
+  }
+
+  /* ********************************************************** */
+  // comment? DOC_STRING_START doc_content DOC_STRING_END
   public static boolean doc_string(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "doc_string")) return false;
-    if (!nextTokenIs(b, "<doc string>", COMMENT_STMT, DOC_STRING_KEY)) return false;
+    if (!nextTokenIs(b, "<doc string>", COMMENT_STMT, DOC_STRING_START)) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, DOC_STRING, "<doc string>");
     r = doc_string_0(b, l + 1);
-    r = r && consumeToken(b, DOC_STRING_KEY);
+    r = r && consumeToken(b, DOC_STRING_START);
+    r = r && doc_content(b, l + 1);
+    r = r && consumeToken(b, DOC_STRING_END);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
