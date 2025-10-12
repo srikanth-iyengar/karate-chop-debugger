@@ -158,21 +158,76 @@ class KarateExecutionService(val project: Project) {
     }
 
     private fun buildMavenProject(callback: Runnable): Boolean {
-        val mavenProjectManager = MavenProjectsManager.getInstance(project);
-        val mavenProjects = mavenProjectManager.projects;
+        val mavenProjectManager = MavenProjectsManager.getInstance(project)
+        val mavenProjects = mavenProjectManager.projects
 
         if (mavenProjects.isEmpty()) {
             notificationGroup.createNotification(
-                "Karate chop error",
-                "No maven projects detected",
+                "Karate Chop Error",
+                "No Maven projects detected",
                 NotificationType.ERROR
             ).notify(project)
             return false
         }
 
-        val runner = MavenRunner.getInstance(project)
         val mavenProject = mavenProjects.first()
 
+        try {
+            val hasTestJarGoal = mavenProject.plugins.any { plugin ->
+                plugin.artifactId == "maven-jar-plugin" &&
+                        plugin.executions.any { exec ->
+                            exec.goals.contains("test-jar")
+                        }
+            }
+
+            if (!hasTestJarGoal) {
+                val pluginSnippet = """
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>{maven-jar-plugin-version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>test-jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            """.trimIndent()
+
+                val notification = notificationGroup
+                    .createNotification(
+                        "Missing test-jar configuration",
+                        """
+                    The <b>maven-jar-plugin</b> in your project does not define the <b>test-jar</b> goal.<br><br>
+                    Add the following snippet to your <code>pom.xml</code> under <code>&lt;plugins&gt;</code>:
+                    """.trimIndent(),
+                        NotificationType.ERROR
+                    )
+
+                notification.addAction(
+                    com.intellij.notification.NotificationAction.createSimpleExpiring("Copy Plugin Snippet") {
+                        val clipboard = java.awt.Toolkit.getDefaultToolkit().systemClipboard
+                        val selection = java.awt.datatransfer.StringSelection(pluginSnippet)
+                        clipboard.setContents(selection, selection)
+                    }
+                )
+
+                notification.notify(project)
+                return false
+            }
+
+        } catch (e: Exception) {
+            notificationGroup.createNotification(
+                "Error Checking Maven Goals",
+                "Unable to verify maven-jar-plugin goals: ${e.message}",
+                NotificationType.WARNING
+            ).notify(project)
+        }
+
+        // ✅ Continue Maven build
+        val runner = MavenRunner.getInstance(project)
         val pomFile = File(mavenProject.file.path)
         val parameters = MavenRunnerParameters(
             pomFile.parent,
@@ -181,7 +236,6 @@ class KarateExecutionService(val project: Project) {
             listOf("clean", "package", "-DskipTests=true"),
             emptyMap()
         )
-        mavenProject.dependencies
 
         runner.run(parameters, null, callback)
         return true

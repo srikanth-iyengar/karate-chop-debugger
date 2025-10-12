@@ -52,12 +52,12 @@ public class DebugServer {
     public void startSubscriber() {
         var publisher = DebugMessageBus.getInstance().publisher(DebugResponse.TOPIC);
         Thread subscriberThread = new Thread(() -> {
-            try(ObjectInputStream stream = new ObjectInputStream(socket.getInputStream())) {
-                while(!Thread.currentThread().isInterrupted()) {
+            try (ObjectInputStream stream = new ObjectInputStream(socket.getInputStream())) {
+                while (!Thread.currentThread().isInterrupted()) {
                     RemoteCall call = (RemoteCall) stream.readObject();
                     Method[] methods = DebugResponse.class.getMethods();
-                    for(Method method: methods){
-                        if(method.getName().startsWith(call.getMethodName())){
+                    for (Method method : methods) {
+                        if (method.getName().startsWith(call.getMethodName())) {
                             logger.info("method: {}", method);
                             method.invoke(publisher, call.getArgs().toArray(new Object[0]));
                             break;
@@ -142,6 +142,8 @@ public class DebugServer {
     }
 
     public void stop() {
-        this.subscriber.interrupt();
+        if (this.subscriber != null) {
+            this.subscriber.interrupt();
+        }
     }
 }

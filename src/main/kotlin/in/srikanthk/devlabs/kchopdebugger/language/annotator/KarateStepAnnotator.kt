@@ -25,7 +25,14 @@ class KarateStepAnnotator : Annotator {
         "driver",
         "url",
         "path",
-        "request"
+        "request",
+        "match",
+        "set",
+        "call",
+        "retry",
+        "eval",
+        "request",
+        "response"
     )
 
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
