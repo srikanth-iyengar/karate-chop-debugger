@@ -123,7 +123,7 @@ public class DebugHook implements RuntimeHook {
         HashMap<String, String> mp = new HashMap<>();
         ObjectMapper mapper = new ObjectMapper();
         for (Map.Entry<String, Variable> entry : vars.entrySet()) {
-            Map<String, Object> varMap = mapper.convertValue(entry.getValue(), Map.class);
+            Map<String, Object> varMap = new HashMap<>();
             varMap.put("type", entry.getValue().type);
             varMap.put("value", entry.getValue().getAsString());
             try {
