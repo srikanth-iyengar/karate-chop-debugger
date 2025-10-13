@@ -35,15 +35,17 @@ open class ToggleDebugPointAction : AnAction() {
     }
 
     override fun update(action: AnActionEvent) {
-        val editor = action.getData(CommonDataKeys.EDITOR)
-        val psiFile = PsiDocumentManager.getInstance(action.project!!).getPsiFile(editor!!.document)
+        try {
+            val editor = action.getData(CommonDataKeys.EDITOR)
+            val psiFile = PsiDocumentManager.getInstance(action.project!!).getPsiFile(editor!!.document)
 
-        val language = psiFile?.language
+            val language = psiFile?.language
 
-        if (language != null) {
-            action.presentation.isEnabledAndVisible = language === KarateLanguage.INSTANCE
-        } else {
-            action.presentation.isEnabledAndVisible = false
-        }
+            if (language != null) {
+                action.presentation.isEnabledAndVisible = language === KarateLanguage.INSTANCE
+            } else {
+                action.presentation.isEnabledAndVisible = false
+            }
+        } catch (e: Exception) {}
     }
 }

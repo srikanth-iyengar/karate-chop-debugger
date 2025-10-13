@@ -104,8 +104,19 @@ class KarateExecutionService(val project: Project) {
                     append("-Ddebug.port=${debugServer.port}")
                 }.trim()
 
+                val options = "$vmOptions -jar ${getAgentJarFile().path} $featureClasspath ${project.basePath} $breakpointPath $urls"
+                val argumentPath = Files.createTempFile("argument", ".txt")
+                Files.writeString(
+                    argumentPath,
+                    options,
+                    StandardOpenOption.TRUNCATE_EXISTING,
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.WRITE
+                )
+
                 val command =
-                    "${getProjectJavaExecutable(project)} $vmOptions -jar ${getAgentJarFile().path} $featureClasspath ${project.basePath} $breakpointPath $urls"
+                    "${getProjectJavaExecutable(project)} @${argumentPath}"
+
                 this.process =
                     ProcessBuilder(*command.split(" ").toTypedArray())
                         .redirectError(ProcessBuilder.Redirect.INHERIT)

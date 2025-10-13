@@ -10,28 +10,36 @@ import java.util.concurrent.CompletableFuture
 
 open class RunTestAction : AnAction() {
     override fun actionPerformed(action: AnActionEvent) {
-        val project = action.project ?: return
+        try {
+            val project = action.project ?: return
 
-        val file = action.getData(CommonDataKeys.VIRTUAL_FILE);
+            val file = action.getData(CommonDataKeys.VIRTUAL_FILE);
 
-        if (file?.extension != "feature") {
-            return
+            if (file?.extension != "feature") {
+                return
+            }
+
+            val executionService = project.getService(KarateExecutionService::class.java);
+            CompletableFuture.supplyAsync { executionService.executeSuite(file.path) }
+        } catch (e: Exception) {
+
         }
-
-        val executionService = project.getService(KarateExecutionService::class.java);
-        CompletableFuture.supplyAsync { executionService.executeSuite(file.path) }
     }
 
     override fun update(action: AnActionEvent) {
-        val editor = action.getData(CommonDataKeys.EDITOR)
-        val psiFile = PsiDocumentManager.getInstance(action.project!!).getPsiFile(editor!!.document)
+        try {
+            val editor = action.getData(CommonDataKeys.EDITOR)
+            val psiFile = PsiDocumentManager.getInstance(action.project!!).getPsiFile(editor!!.document)
 
-        val language = psiFile?.language
+            val language = psiFile?.language
 
-        if (language != null) {
-            action.presentation.isEnabledAndVisible = language === KarateLanguage.INSTANCE
-        } else {
-            action.presentation.isEnabledAndVisible = false
+            if (language != null) {
+                action.presentation.isEnabledAndVisible = language === KarateLanguage.INSTANCE
+            } else {
+                action.presentation.isEnabledAndVisible = false
+            }
+        } catch (e: Exception) {
+
         }
     }
 }
