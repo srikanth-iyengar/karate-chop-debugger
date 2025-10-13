@@ -16,7 +16,7 @@ feature ::= (comment|tags)* FEATURE_KEYWORD description? background? (scenario |
 
 comment ::= COMMENT_STMT
 
-description ::= line+
+description ::= (line)+
 
 line ::= NEWLINE? (word | WS_KEY)+
 
@@ -38,4 +38,4 @@ doc_string ::= comment? DOC_STRING_START doc_content DOC_STRING_END
 
 doc_content ::= DOC_STRING_CONTENT*
 
-word ::= WORD_KEY
+word ::= (WORD_KEY | TABLE_ROW)

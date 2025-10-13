@@ -33,7 +33,9 @@ class KarateStepAnnotator : Annotator {
         "eval",
         "request",
         "response",
-        "print"
+        "print",
+        "params",
+        "header"
     )
 
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {

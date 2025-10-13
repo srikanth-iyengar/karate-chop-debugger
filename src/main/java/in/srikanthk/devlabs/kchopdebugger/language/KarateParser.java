@@ -114,18 +114,28 @@ public class KarateParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // line+
+  // (line)+
   public static boolean description(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "description")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, DESCRIPTION, "<description>");
-    r = line(b, l + 1);
+    r = description_0(b, l + 1);
     while (r) {
       int c = current_position_(b);
-      if (!line(b, l + 1)) break;
+      if (!description_0(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "description", c)) break;
     }
     exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // (line)
+  private static boolean description_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "description_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = line(b, l + 1);
+    exit_section_(b, m, null, r);
     return r;
   }
 
@@ -561,14 +571,15 @@ public class KarateParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // WORD_KEY
+  // WORD_KEY | TABLE_ROW
   public static boolean word(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "word")) return false;
-    if (!nextTokenIs(b, WORD_KEY)) return false;
+    if (!nextTokenIs(b, "<word>", TABLE_ROW, WORD_KEY)) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, WORD, "<word>");
     r = consumeToken(b, WORD_KEY);
-    exit_section_(b, m, WORD, r);
+    if (!r) r = consumeToken(b, TABLE_ROW);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
