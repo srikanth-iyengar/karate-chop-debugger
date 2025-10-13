@@ -101,7 +101,7 @@ class KarateExecutionService(val project: Project) {
 
                 val vmOptions = buildString {
                     runPropertiesService?.state?.entries?.forEach { entry ->
-                        append("-D${entry.key}=${entry.value} ")
+                        append("\"-D${entry.key}=${entry.value}\" ")
                     }
                     append("-Ddebug.port=${debugServer.port}")
                 }.trim()
