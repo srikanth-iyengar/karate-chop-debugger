@@ -144,13 +144,8 @@ public class DebugServer {
 
     public void stop() {
         try {
-            this.socket.close();
-            if (this.subscriber != null) {
-                this.subscriber.interrupt();
-            }
-            DebugMessageBus.getInstance().unsubscribe(DebugRequest.TOPIC, this.requestForwarder);
             this.requestForwarder = null;
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
