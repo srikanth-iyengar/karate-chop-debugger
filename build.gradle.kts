@@ -36,7 +36,11 @@ intellijPlatform {
         }
 
         changeNotes = """
-            Initial version
+            1. Syntax highlighting support for karate-dsl files
+            2. Debugger support for debugging karate suites
+            3. JSON and XML language support in doc string comments
+            4. Support for rerun step over and resume support in debugger
+            5. Simple properties configuration UI
         """.trimIndent()
     }
 }
