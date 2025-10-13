@@ -10,20 +10,16 @@ import java.util.concurrent.CompletableFuture
 
 open class RunTestAction : AnAction() {
     override fun actionPerformed(action: AnActionEvent) {
-        try {
-            val project = action.project ?: return
+        val project = action.project ?: return
 
-            val file = action.getData(CommonDataKeys.VIRTUAL_FILE);
+        val file = action.getData(CommonDataKeys.VIRTUAL_FILE);
 
-            if (file?.extension != "feature") {
-                return
-            }
-
-            val executionService = project.getService(KarateExecutionService::class.java);
-            CompletableFuture.supplyAsync { executionService.executeSuite(file.path) }
-        } catch (e: Exception) {
-
+        if (file?.extension != "feature") {
+            return
         }
+
+        val executionService = project.getService(KarateExecutionService::class.java);
+        CompletableFuture.supplyAsync { executionService.executeSuite(file.path) }
     }
 
     override fun update(action: AnActionEvent) {

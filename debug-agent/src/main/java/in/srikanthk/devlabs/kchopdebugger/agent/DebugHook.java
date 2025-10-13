@@ -123,9 +123,11 @@ public class DebugHook implements RuntimeHook {
         HashMap<String, String> mp = new HashMap<>();
         ObjectMapper mapper = new ObjectMapper();
         for (Map.Entry<String, Variable> entry : vars.entrySet()) {
-            Map value = Map.of("type", entry.getValue().type, "value", entry.getValue().getAsString());
+            Map<String, Object> varMap = mapper.convertValue(entry.getValue(), Map.class);
+            varMap.put("type", entry.getValue().type);
+            varMap.put("value", entry.getValue().getAsString());
             try {
-                mp.put(entry.getKey(), mapper.writeValueAsString(value));
+                mp.put(entry.getKey(), mapper.writeValueAsString(varMap));
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }

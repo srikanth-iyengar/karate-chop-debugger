@@ -23,7 +23,9 @@ import io.ktor.util.collections.*
 import org.jetbrains.idea.maven.execution.MavenRunner
 import org.jetbrains.idea.maven.execution.MavenRunnerParameters
 import org.jetbrains.idea.maven.project.MavenProjectsManager
+import java.io.BufferedReader
 import java.io.File
+import java.io.InputStreamReader
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
@@ -119,10 +121,25 @@ class KarateExecutionService(val project: Project) {
 
                 this.process =
                     ProcessBuilder(*command.split(" ").toTypedArray())
-                        .redirectError(ProcessBuilder.Redirect.INHERIT)
-                        .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                        .redirectError(ProcessBuilder.Redirect.PIPE)
+                        .redirectOutput(ProcessBuilder.Redirect.PIPE)
                         .start();
+                val stdout = BufferedReader(InputStreamReader(process?.inputStream))
+                val stderr = BufferedReader(InputStreamReader(process?.errorStream))
 
+                // Read stdout in its own thread
+                Thread {
+                    stdout.forEachLine { line ->
+                        responsePublisher.appendLog(line, true)
+                    }
+                }.start()
+
+                // Read stderr in its own thread
+                Thread {
+                    stderr.forEachLine { line ->
+                        responsePublisher.appendLog(line, false)
+                    }
+                }.start()
                 process?.waitFor()
 
                 debugServer.stop()
@@ -205,7 +222,7 @@ class KarateExecutionService(val project: Project) {
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>{maven-jar-plugin-version}</version>
+                    <version>$\{maven-jar-plugin-version}</version>
                     <executions>
                         <execution>
                             <goals>
@@ -253,7 +270,7 @@ class KarateExecutionService(val project: Project) {
             pomFile.parent,
             pomFile.name,
             true,
-            listOf("clean", "package", "-DskipTests=true"),
+            listOf("package", "-DskipTests=true"),
             emptyMap()
         )
 
@@ -318,7 +335,6 @@ class KarateExecutionService(val project: Project) {
             }
 
             override fun appendLog(log: String, isSuccess: Boolean) {
-                responsePublisher.appendLog(log, isSuccess)
             }
 
             override fun evaluationResult(
