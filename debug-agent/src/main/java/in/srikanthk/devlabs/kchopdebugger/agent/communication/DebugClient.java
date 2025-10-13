@@ -56,6 +56,7 @@ public class DebugClient extends DebugServer {
                 logger.error(e.getMessage(), e);
             }
         });
+        subscriberThread.setDaemon(true);
         subscriberThread.start();
 
         this.subscriber = subscriberThread;
@@ -117,4 +118,14 @@ public class DebugClient extends DebugServer {
         DebugMessageBus.getInstance().subscribe(DebugResponse.TOPIC, requestForwarder);
     }
 
+    @Override
+    public void stop() {
+        try {
+            if (this.subscriber != null) {
+                this.subscriber.interrupt();
+            }
+        } catch(Exception e) {
+
+        }
+    }
 }

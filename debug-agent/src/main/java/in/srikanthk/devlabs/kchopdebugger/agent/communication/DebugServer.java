@@ -25,6 +25,7 @@ public class DebugServer {
     private Integer port;
     Socket socket;
     private Thread subscriber;
+    private DebugRequest requestForwarder;
 
     DebugServer() {
     }
@@ -42,7 +43,6 @@ public class DebugServer {
                 startSubscriber();
                 registerForwarder();
             } catch (IOException e) {
-                throw new RuntimeException(e);
             }
         });
         serverThread.start();
@@ -69,13 +69,14 @@ public class DebugServer {
                 logger.error(e.getMessage(), e);
             }
         });
+        subscriberThread.setDaemon(true);
         subscriberThread.start();
 
         this.subscriber = subscriberThread;
     }
 
     public void registerForwarder() throws IOException {
-        var requestForwarder = new DebugRequest() {
+        this.requestForwarder = new DebugRequest() {
             ObjectOutputStream stream = new ObjectOutputStream(socket.getOutputStream());
 
             @Override
@@ -142,8 +143,15 @@ public class DebugServer {
     }
 
     public void stop() {
-        if (this.subscriber != null) {
-            this.subscriber.interrupt();
+        try {
+            this.socket.close();
+            if (this.subscriber != null) {
+                this.subscriber.interrupt();
+            }
+            DebugMessageBus.getInstance().unsubscribe(DebugRequest.TOPIC, this.requestForwarder);
+            this.requestForwarder = null;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

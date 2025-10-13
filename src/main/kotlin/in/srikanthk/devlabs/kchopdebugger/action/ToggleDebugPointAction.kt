@@ -10,7 +10,7 @@ import `in`.srikanthk.devlabs.kchopdebugger.language.KarateLanguage
 import `in`.srikanthk.devlabs.kchopdebugger.service.KarateExecutionService
 
 
-open class AddDebugPointAction : AnAction() {
+open class ToggleDebugPointAction : AnAction() {
     override fun actionPerformed(action: AnActionEvent) {
         val editor = action.getData(CommonDataKeys.EDITOR)
         val psiFile = action.getData(CommonDataKeys.PSI_FILE)
@@ -30,7 +30,7 @@ open class AddDebugPointAction : AnAction() {
         // Get current line number (0-based)
         val lineNumber = editor.caretModel.logicalPosition.line + 1
 
-        karateExecutionService?.addBreakpoint(virtualFile?.path!!, lineNumber);
+        karateExecutionService?.toggleBreakpoint(virtualFile?.path!!, lineNumber);
         DaemonCodeAnalyzer.getInstance(action.project).restart(psiFile)
     }
 

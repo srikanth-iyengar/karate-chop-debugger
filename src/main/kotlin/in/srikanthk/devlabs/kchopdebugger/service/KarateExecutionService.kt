@@ -140,6 +140,15 @@ class KarateExecutionService(val project: Project) {
         remotePublisher.addBreakpoint(file, lineNumber)
     }
 
+    fun toggleBreakpoint(file: String, lineNumber: Int) {
+        val breakpointSet = breakpoints.computeIfAbsent(file) { ConcurrentSkipListSet() }
+        if(breakpointSet.contains(lineNumber)) {
+            this.removeBreakpoint(file, lineNumber)
+        } else {
+            breakpointSet.add(lineNumber)
+        }
+    }
+
     fun removeBreakpoint(file: String, lineNumber: Int) {
         breakpoints[file]?.remove(lineNumber)
         breakpointUpdatePublisher?.updatedBreakpoint()

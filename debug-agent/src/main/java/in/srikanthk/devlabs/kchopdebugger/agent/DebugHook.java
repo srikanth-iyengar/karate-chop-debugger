@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.karate.KarateException;
 import com.intuit.karate.RuntimeHook;
 import com.intuit.karate.Suite;
-import com.intuit.karate.core.ScenarioRuntime;
-import com.intuit.karate.core.Step;
-import com.intuit.karate.core.StepResult;
-import com.intuit.karate.core.Variable;
+import com.intuit.karate.core.*;
 import in.srikanthk.devlabs.kchopdebugger.agent.topic.DebugRequest;
 import in.srikanthk.devlabs.kchopdebugger.agent.topic.DebugResponse;
 
@@ -142,5 +139,12 @@ public class DebugHook implements RuntimeHook {
         String reportPath = String.format("%s/karate-summary.html", new File(suite.reportDir).toPath().toUri());
         responsePublisher.appendLog(String.format("Karate report: %s", reportPath), true);
         responsePublisher.updateState(DebuggerState.Finished);
+    }
+
+    @Override
+    public void afterFeature(FeatureRuntime fr) {
+        if(fr.result.isFailed()) {
+            this.responsePublisher.appendLog(fr.result.getErrorMessages(), false);
+        }
     }
 }

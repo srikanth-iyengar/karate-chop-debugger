@@ -61,10 +61,10 @@
         <multiHostInjector
                 implementation="in.srikanthk.devlabs.kchopdebugger.language.annotator.injector.KarateDocStringInjector"/>
         <annotator language="karate-dsl"
-                   implementationClass="in.srikanthk.devlabs.kchopdebugger.language.annotator.DocStringAnnotator"
+                   implementationClass="in.srikanthk.devlabs.kchopdebugger.language.annotator.KarateStepAnnotator"
         />
         <annotator language="karate-dsl"
-                   implementationClass="in.srikanthk.devlabs.kchopdebugger.language.annotator.KarateStepAnnotator"
+                   implementationClass="in.srikanthk.devlabs.kchopdebugger.language.annotator.KarateDescriptionAnnotator"
         />
     </extensions>
     <projectListeners>
@@ -75,15 +75,21 @@
     <actions>
         <action id="in.srikanthk.devlabs.kchopdebugger.action.RunTestAction"
                 class="in.srikanthk.devlabs.kchopdebugger.action.RunTestAction" text="Debug Test">
-            <add-to-group group-id="EditorPopupMenu" anchor="before" relative-to-action="GotoAction"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+            <keyboard-shortcut first-keystroke="shift F9" keymap="$default" />
         </action>
         <action id="in.srikanthk.devlabs.kchopdebugger.action.AddDebugPointAction"
                 class="in.srikanthk.devlabs.kchopdebugger.action.AddDebugPointAction" text="Add Breakpoint">
-            <add-to-group group-id="EditorPopupMenu" anchor="before" relative-to-action="GotoAction"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
         </action>
         <action id="in.srikanthk.devlabs.kchopdebugger.action.RemoveDebugPointAction"
                 class="in.srikanthk.devlabs.kchopdebugger.action.RemoveDebugPointAction" text="Remove Breakpoint">
-            <add-to-group group-id="EditorPopupMenu" anchor="before" relative-to-action="GotoAction"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+        </action>
+        <action id="in.srikanthk.devlabs.kchopdebugger.action.ToggleDebugPointAction"
+                class="in.srikanthk.devlabs.kchopdebugger.action.ToggleDebugPointAction" text="Toggle Breakpoint">
+            <add-to-group group-id="EditorPopupMenu" anchor="first" />
+            <keyboard-shortcut first-keystroke="ctrl F8" keymap="$default" />
         </action>
     </actions>
 </idea-plugin>

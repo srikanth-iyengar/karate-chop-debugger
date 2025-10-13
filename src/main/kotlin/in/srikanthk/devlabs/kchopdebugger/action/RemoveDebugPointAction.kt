@@ -5,6 +5,8 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.psi.PsiDocumentManager
+import `in`.srikanthk.devlabs.kchopdebugger.language.KarateLanguage
 import `in`.srikanthk.devlabs.kchopdebugger.service.KarateExecutionService
 
 
@@ -26,5 +28,18 @@ open class RemoveDebugPointAction : AnAction() {
 
         karateExecutionService?.removeBreakpoint(virtualFile?.path!!, lineNumber);
         DaemonCodeAnalyzer.getInstance(action.project).restart(psiFile)
+    }
+
+    override fun update(action: AnActionEvent) {
+        val editor = action.getData(CommonDataKeys.EDITOR)
+        val psiFile = PsiDocumentManager.getInstance(action.project!!).getPsiFile(editor!!.document)
+
+        val language = psiFile?.language
+
+        if (language != null) {
+            action.presentation.isEnabledAndVisible = language === KarateLanguage.INSTANCE
+        } else {
+            action.presentation.isEnabledAndVisible = false
+        }
     }
 }

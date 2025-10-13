@@ -6,16 +6,20 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.editor.markup.GutterIconRenderer
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
+import com.intellij.psi.tree.TokenSet
 import com.intellij.psi.util.elementType
+import `in`.srikanthk.devlabs.kchopdebugger.language.KarateTypes
 import `in`.srikanthk.devlabs.kchopdebugger.service.KarateExecutionService
 
 
 class KarateLineMarkerProvider : LineMarkerProvider {
     override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<*>? {
         if (shouldHighlight(element)) {
+            val children = element.node.getChildren(TokenSet.create(KarateTypes.WS_KEY))
+            if(children.isEmpty()) return null
             return LineMarkerInfo(
-                element,
-                element.textRange,
+                children.first().psi,
+                children.first().textRange,
                 AllIcons.Debugger.Db_set_breakpoint,
                 null,
                 null,

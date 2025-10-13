@@ -1,10 +1,15 @@
 package in.srikanthk.devlabs.kchopdebugger.agent;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.karate.Runner;
+import com.intuit.karate.Suite;
 import in.srikanthk.devlabs.kchopdebugger.agent.communication.DebugClient;
+import in.srikanthk.devlabs.kchopdebugger.agent.topic.DebugResponse;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +27,7 @@ public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final SessionState sessionState = SessionState.getInstance();
+    private static final DebugResponse responsePublisher = DebugMessageBus.getInstance().publisher(DebugResponse.TOPIC);
 
     public static void main(String[] args) {
         if (args.length < 4) {
@@ -45,14 +51,20 @@ public class Main {
             DebugClient client = new DebugClient("localhost", NumberUtils.toInt(System.getProperty("debug.port")));
 
             var th = new Thread(() -> {
-               executeSuite(customLoader);
+                try {
+                    executeSuite(customLoader);
+                } catch (Exception e) {
+                    responsePublisher.appendLog(getStackTraceAsString(e), false);
+                }
             });
             th.setContextClassLoader(customLoader);
             th.start();
             th.join();
 
             client.stop();
+            System.exit(0);
         } catch (Exception e) {
+            responsePublisher.appendLog(getStackTraceAsString(e), false);
             logger.error("Execution failed", e);
             System.exit(2);
         }
@@ -101,4 +113,12 @@ public class Main {
                 .reportDir(new File(sessionState.getProjectPath(), "karate-report").getAbsolutePath())
                 .parallel(1);
     }
+
+    public static String getStackTraceAsString(Throwable t) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        t.printStackTrace(pw);
+        return sw.toString();
+    }
+
 }

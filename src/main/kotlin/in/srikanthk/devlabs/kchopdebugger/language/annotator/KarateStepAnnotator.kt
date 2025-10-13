@@ -32,7 +32,8 @@ class KarateStepAnnotator : Annotator {
         "retry",
         "eval",
         "request",
-        "response"
+        "response",
+        "print"
     )
 
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
@@ -60,23 +61,25 @@ class KarateStepAnnotator : Annotator {
         // Highlight second child (step text)
         if (children.size > 1) {
             val list = children[1].getChildren(TokenSet.create(KarateTypes.WORD))
-            if(!list.isEmpty()) {
+            if (!list.isEmpty()) {
                 list.forEachIndexed { index, child ->
                     val secondPsi = child.psi
                     val text = child.text
 
                     if (child.elementType.toString() == "WORD" && index == 0) {
-                        if (text.trim(' ', '\t') in karateTypes) {
+                        if (text in karateTypes) {
                             highlight(holder, secondPsi.textRange, DefaultLanguageHighlighterColors.INSTANCE_FIELD)
                         }
-                        return
+                        return@forEachIndexed
                     }
-                    if(text.toDoubleOrNull() != null) {
+                    if (text.toDoubleOrNull() != null) {
                         highlight(holder, secondPsi.textRange, DefaultLanguageHighlighterColors.NUMBER)
-                    } else {
+                    } else if (
+                        (text.startsWith('\'') && text.endsWith('\'')) ||
+                        (text.startsWith('\"') && text.endsWith('\"'))
+                    ) {
                         highlight(holder, secondPsi.textRange, DefaultLanguageHighlighterColors.STRING)
                     }
-                    return
                 }
             }
         }
