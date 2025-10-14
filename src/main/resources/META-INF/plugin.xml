@@ -3,7 +3,7 @@
 
     <name>Karate Chop Debugger</name>
 
-    <vendor url="https://devlab.srikanthk.in">DevLabs</vendor>
+    <vendor url="https://devlab.srikanthk.in">Srikanth Iyengar</vendor>
 
     <description><![CDATA[
   Karate Chop Debugger is an unofficial IntelliJ plugin that makes debugging Karate test cases a lot easier.
@@ -11,7 +11,7 @@
   Set breakpoints directly in your <code>.feature</code> files, run tests in debug mode, and inspect variables on the fly — all from the comfort of your IDE. No more scanning logs line by line to figure out what went wrong.
 
   With this plugin, you can:
-  • Add breakpoints with a simple right-click
+  • Add breakpoints with a simple right-click / through shortcut
   • View live variables and responses when a breakpoint is hit
   • Jump straight to the lines being executed
   • Seamlessly work with your existing Karate projects
@@ -34,8 +34,6 @@
                     icon="AllIcons.Toolwindows.ToolWindowInspection"/>
         <applicationService
                 serviceImplementation="in.srikanthk.devlabs.kchopdebugger.configuration.KarateDebuggerConfiguration"/>
-        <applicationService
-                    serviceImplementation="in.srikanthk.devlabs.kchopdebugger.configuration.KaratePropertiesState"/>
         <applicationConfigurable
                 parentId="tools"
                 instance="in.srikanthk.devlabs.kchopdebugger.ui.AppSettingsConfigurable"

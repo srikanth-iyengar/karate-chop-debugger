@@ -1,14 +1,18 @@
 package `in`.srikanthk.devlabs.kchopdebugger.ui
 
 import com.intellij.icons.AllIcons
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.colors.EditorColorsManager
+import com.intellij.openapi.editor.impl.DocumentMarkupModel
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
+import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
@@ -33,10 +37,12 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
     private val logViewPanel = LogViewPanel(project)
     private val breakpointsPanel = BreakpointEditorPanel(project)
     private val tabbedPane = JBTabbedPane()
-    private val karatePropertiesPanel = PropertiesEditorPanel()
+    private val karatePropertiesPanel = PropertiesEditorPanel(project)
     private var state: DebuggerState = DebuggerState.Finished
     private val publisher: DebuggerInfoRequestTopic? = project.messageBus.syncPublisher(DebuggerInfoRequestTopic.TOPIC)
     private val karateExecutionService = project.getService(KarateExecutionService::class.java)
+    val notificationGroup = NotificationGroupManager.getInstance()
+        .getNotificationGroup("Karate Chop Debugger Notification")
 
     private val resumeAction = object : AnAction("Resume", "Resume Execution", AllIcons.Actions.Resume) {
         override fun actionPerformed(e: AnActionEvent) {
@@ -130,7 +136,9 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
         state = newState
 
         if (state == DebuggerState.Finished) {
-            karateExecutionService.getBreakpoints().keys.forEach { cleanupMarkups(it) }
+            karateExecutionService.lastExecutedFileName?.let  {
+                cleanupMarkups(it)
+            }
         }
 
         if (state == DebuggerState.Started) {
@@ -140,13 +148,12 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
     }
 
     private fun cleanupMarkups(filepath: String) {
-        val file = LocalFileSystem.getInstance().findFileByPath(filepath)
-        file?.let {
-            val descriptor = OpenFileDescriptor(project, it, 0, 0)
-            FileEditorManager.getInstance(project)
-                .openTextEditor(descriptor, true)
-                ?.markupModel
-                ?.removeAllHighlighters()
+        val virtualFile = LocalFileSystem.getInstance().findFileByPath(filepath)
+        virtualFile?.let {
+            val descriptor = OpenFileDescriptor(project, virtualFile)
+            val editor = FileEditorManager.getInstance(project).openTextEditor(descriptor, true) ?: return
+            val markupModel = editor.markupModel
+            markupModel.removeAllHighlighters()
         }
     }
 
@@ -174,6 +181,13 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
             )
 
             descriptor.navigate(true)
+        } else {
+            notificationGroup
+                .createNotification(
+                    "External file detected",
+                    "The debugger stepped into a source file located outside the current project.",
+                    NotificationType.ERROR
+                ).notify(project)
         }
     }
 }

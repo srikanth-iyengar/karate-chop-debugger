@@ -1,25 +1,24 @@
 package in.srikanthk.devlabs.kchopdebugger.agent;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.karate.Runner;
-import com.intuit.karate.Suite;
 import in.srikanthk.devlabs.kchopdebugger.agent.communication.DebugClient;
+import in.srikanthk.devlabs.kchopdebugger.agent.topic.DebugRequest;
 import in.srikanthk.devlabs.kchopdebugger.agent.topic.DebugResponse;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -50,6 +49,39 @@ public class Main {
             logger.info("Debug port: {}", System.getProperty("debug.port"));
             DebugClient client = new DebugClient("localhost", NumberUtils.toInt(System.getProperty("debug.port")));
 
+            DebugMessageBus.getInstance().subscribe(DebugRequest.TOPIC, new DebugRequest() {
+                @Override
+                public void publishKarateVariables() {
+
+                }
+
+                @Override
+                public void stepOver() {
+
+                }
+
+                @Override
+                public void resume() {
+
+                }
+
+                @Override
+                public void evaluateExpression(String expression) {
+
+                }
+
+                @Override
+                public void addBreakpoint(String fileName, Integer lineNumber) {
+                    var breakpoints = SessionState.getInstance().getBreakpoints();
+                    breakpoints.computeIfAbsent(fileName, k -> new TreeSet<>()).add(lineNumber);
+                }
+
+                @Override
+                public void removeBreakpoint(String fileName, Integer lineNumber) {
+                    var breakpoints = SessionState.getInstance().getBreakpoints();
+                    breakpoints.computeIfAbsent(fileName, k -> new TreeSet<>()).remove(lineNumber);
+                }
+            });
             var th = new Thread(() -> {
                 try {
                     executeSuite(customLoader);

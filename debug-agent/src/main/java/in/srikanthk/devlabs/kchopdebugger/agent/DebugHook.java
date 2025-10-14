@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.apache.commons.lang3.StringUtils.removeStart;
 
 public class DebugHook implements RuntimeHook {
-    private final HashMap<String, TreeSet<Integer>> breakpoints = SessionState.getInstance().getBreakpoints();
+    private final Map<String, TreeSet<Integer>> breakpoints = SessionState.getInstance().getBreakpoints();
     private final AtomicBoolean stopOnNextStep = new AtomicBoolean(false);
     private final DebugResponse responsePublisher = DebugMessageBus.getInstance().publisher(DebugResponse.TOPIC);
     private final DebugMessageBus messageBus = DebugMessageBus.getInstance();
@@ -90,12 +90,10 @@ public class DebugHook implements RuntimeHook {
 
                 @Override
                 public void addBreakpoint(String fileName, Integer lineNumber) {
-                    breakpoints.computeIfAbsent(fileName, k -> new TreeSet<>()).add(lineNumber);
                 }
 
                 @Override
                 public void removeBreakpoint(String fileName, Integer lineNumber) {
-                    breakpoints.computeIfAbsent(fileName, k -> new TreeSet<>()).remove(lineNumber);
                 }
             };
             messageBus.subscribe(DebugRequest.TOPIC, listener);
