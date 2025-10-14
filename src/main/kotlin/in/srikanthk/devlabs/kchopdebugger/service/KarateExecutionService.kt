@@ -37,7 +37,7 @@ import kotlin.io.path.pathString
 class KarateExecutionService(val project: Project) {
     val mapper = ObjectMapper()
     private val responsePublisher = project.messageBus.syncPublisher(DebuggerInfoResponseTopic.TOPIC)
-    private val runPropertiesService = KaratePropertiesState.getInstance()
+    private val runPropertiesService = KaratePropertiesState.getInstance(project)
     val notificationGroup = NotificationGroupManager.getInstance()
         .getNotificationGroup("Karate Chop Debugger Notification")
     val breakpointUpdatePublisher: BreakpointUpdatedTopic? =
@@ -46,9 +46,17 @@ class KarateExecutionService(val project: Project) {
 
     private val breakpoints: MutableMap<String, ConcurrentSkipListSet<Int>> = ConcurrentMap();
     private var process: Process? = null
-    private var lastExecutedFileName: String? = null
+    var lastExecutedFileName: String? = null
 
     fun executeSuite(fileName: String) {
+        if(this.process != null) {
+            notificationGroup
+                .createNotification(
+                    "Debugger already running",
+                    "A debugging session is already in progress. Stop it before starting a new one.",NotificationType.WARNING)
+                .notify(project)
+            return
+        }
         this.lastExecutedFileName = fileName
         buildMavenProject {
             ApplicationManager.getApplication().executeOnPooledThread {
@@ -100,7 +108,7 @@ class KarateExecutionService(val project: Project) {
                 val debugServer = DebugServer.getInstance().start()
 
                 val vmOptions = buildString {
-                    runPropertiesService?.state?.entries?.forEach { entry ->
+                    runPropertiesService?.state?.state?.entries?.forEach { entry ->
                         append("\"-D${entry.key}=${entry.value}\" ")
                     }
                     append("-Ddebug.port=${debugServer.port}")
@@ -173,7 +181,7 @@ class KarateExecutionService(val project: Project) {
         if(breakpointSet.contains(lineNumber)) {
             this.removeBreakpoint(file, lineNumber)
         } else {
-            breakpointSet.add(lineNumber)
+            this.addBreakpoint(file, lineNumber)
         }
     }
 

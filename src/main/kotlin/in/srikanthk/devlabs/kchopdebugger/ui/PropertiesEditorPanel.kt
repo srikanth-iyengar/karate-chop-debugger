@@ -2,28 +2,55 @@ package `in`.srikanthk.devlabs.kchopdebugger.ui
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.ide.CopyPasteManager
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.ui.ToolbarDecorator
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.table.JBTable
 import `in`.srikanthk.devlabs.kchopdebugger.configuration.KaratePropertiesState
+import `in`.srikanthk.devlabs.kchopdebugger.configuration.PropertiesState
 import java.awt.BorderLayout
 import java.awt.datatransfer.DataFlavor
 import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
+import java.util.Properties
 import javax.swing.*
 import javax.swing.event.TableModelEvent
-import javax.swing.event.TableModelListener
 import javax.swing.table.AbstractTableModel
+import javax.swing.table.DefaultTableCellRenderer
 
 data class PropertyEntry(var name: String, var value: String)
 
-class PropertiesEditorPanel : JPanel(BorderLayout()) {
+class PropertiesEditorPanel(val project: Project) : JPanel(BorderLayout()) {
 
+    private val karatePropertiesState = KaratePropertiesState.getInstance(project)
     private val tableModel = PropertyTableModel()
     private val table = JBTable(tableModel).apply {
         autoResizeMode = JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS
         rowHeight = 24
+
+        // Mask renderer
+        columnModel.getColumn(1).cellRenderer = object : DefaultTableCellRenderer() {
+            override fun getTableCellRendererComponent(
+                table: JTable,
+                value: Any?,
+                isSelected: Boolean,
+                hasFocus: Boolean,
+                row: Int,
+                column: Int
+            ): java.awt.Component {
+                val comp = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
+                val model = table.model as PropertyTableModel
+                val entry = model.entries[row]
+                val shouldMask = entry.name.contains("password", true) ||
+                        entry.name.contains("pwd", true) ||
+                        entry.name.contains("secret", true)
+                text = if (shouldMask && !isEditing(table, row, column)) "•".repeat(entry.value.length) else entry.value
+                return comp
+            }
+            private fun isEditing(table: JTable, row: Int, col: Int) =
+                table.editingRow == row && table.editingColumn == col
+        }
     }
 
     init {
@@ -76,19 +103,19 @@ class PropertiesEditorPanel : JPanel(BorderLayout()) {
     }
 
     private fun loadProperties() {
-        val state = KaratePropertiesState.getInstance()?.state ?: return
-        val entries = state.entries.map { PropertyEntry(it.key.toString(), it.value.toString()) }
+        val state = karatePropertiesState?.state ?: return
+        val entries = state.state.entries.map { PropertyEntry(it.key.toString(), it.value.toString()) }
         tableModel.setData(entries)
     }
 
     private fun saveProperties() {
-        val state = KaratePropertiesState.getInstance()?.state ?: return
-        state.clear()
+        val state: MutableMap<String, String> = mutableMapOf()
         tableModel.entries.forEach {
             if (it.name.isNotBlank()) {
-                state.setProperty(it.name.trim(), it.value.trim())
+                state[it.name.trim()] = it.value.trim()
             }
         }
+        karatePropertiesState?.loadState(PropertiesState(state));
     }
 
     private class PropertyTableModel : AbstractTableModel() {
