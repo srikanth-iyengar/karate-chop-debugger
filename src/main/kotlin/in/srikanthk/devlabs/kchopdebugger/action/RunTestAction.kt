@@ -9,6 +9,7 @@ import `in`.srikanthk.devlabs.kchopdebugger.service.KarateExecutionService
 import java.util.concurrent.CompletableFuture
 
 open class RunTestAction : AnAction() {
+    var scenarioName: String? = null
     override fun actionPerformed(action: AnActionEvent) {
         val project = action.project ?: return
 
@@ -19,7 +20,7 @@ open class RunTestAction : AnAction() {
         }
 
         val executionService = project.getService(KarateExecutionService::class.java);
-        CompletableFuture.supplyAsync { executionService.executeSuite(file.path) }
+        CompletableFuture.supplyAsync { executionService.executeSuite(file.path, scenarioName) }
     }
 
     override fun update(action: AnActionEvent) {

@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "in.srikanthk.devlabs"
-version = "2.1.6"
+version = "2.2.6"
 
 repositories {
     mavenCentral()
@@ -36,11 +36,24 @@ intellijPlatform {
         }
 
         changeNotes = """
-            1. Syntax highlighting support for karate-dsl files
-            2. Debugger support for debugging karate suites
-            3. JSON and XML language support in doc string comments
-            4. Support for rerun step over and resume support in debugger
-            5. Simple properties configuration UI
+            <html>
+              <body>
+                <h2>What's New in 2.2.6</h2>
+                <ul>
+                  <li><b>Run individual scenarios</b> directly from the editor with the Run icon.</li>
+                  <li><b>Seamless IntelliJ breakpoint integration</b> – no manual setup needed.</li>
+                  <li>Added <b>Step Into</b> support to move through tests step by step during debugging.</li>
+                  <li>Improved <b>syntax highlighting</b> and <b>newline handling</b> in Karate feature files.</li>
+                  <li>Removed outdated breakpoint panels for a <b>cleaner, simpler interface</b>.</li>
+                </ul>
+                <h3>Bug Fixes</h3>
+                <ul>
+                  <li>Resolved issues with parsing scenarios separated by blank lines.</li>
+                  <li>Improved syntax highlighting stability.</li>
+                  <li>Fixed rare crash when re-running tests.</li>
+                </ul>
+              </body>
+            </html>
         """.trimIndent()
     }
 }

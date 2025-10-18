@@ -135,7 +135,7 @@ class DebugVariableTable(private val project: Project) : JPanel(BorderLayout()) 
 
         val prettyJson = try {
             val jsonNode = objectMapper.readTree(json)
-            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode)
+            jsonNode.toPrettyString()
         } catch (e: Exception) {
             json // Not a valid JSON, show as is
         }
@@ -145,7 +145,7 @@ class DebugVariableTable(private val project: Project) : JPanel(BorderLayout()) 
 
         val popup = JBPopupFactory.getInstance()
             .createComponentPopupBuilder(editor.component, editor.contentComponent)
-            .setTitle("Evaluated JSON")
+            .setTitle("Evaluated Result")
             .setResizable(true)
             .setMovable(true)
             .setRequestFocus(true)
