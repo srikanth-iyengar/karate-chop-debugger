@@ -39,6 +39,8 @@ intellijPlatform {
             <html>
               <body>
                 <ul>
+                  <li>Ability to step over/into scenarios</li>
+                  <li>Add keymaps</li>
                   <li><b>Run individual scenarios</b> directly from the editor with the Run icon.</li>
                   <li><b>Seamless IntelliJ breakpoint integration</b> – no manual setup needed.</li>
                   <li>Added <b>Step Into</b> support to move through tests step by step during debugging.</li>

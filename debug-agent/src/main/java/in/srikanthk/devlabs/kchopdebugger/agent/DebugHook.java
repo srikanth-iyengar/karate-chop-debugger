@@ -25,7 +25,6 @@ public class DebugHook implements RuntimeHook {
     private final SessionState sessionState = SessionState.getInstance();
     private Scenario stepOverScenario;
     private boolean doingStepOver = false;
-    private Stack<Scenario> stepOverStack = new Stack<>();
 
     private static final String JAVA_BASE_PATH = "src/test/java";
     private static final String CLASSPATH_COLON = "classpath:";
@@ -42,9 +41,7 @@ public class DebugHook implements RuntimeHook {
                 stopOnNextStep.set(true);
                 stepOverScenario = null;
                 doingStepOver = false;
-                stepOverStack.clear();
             } else {
-                stepOverStack.add(sr.scenario);
                 return true;
             }
         }
