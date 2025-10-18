@@ -65,8 +65,7 @@ public class DebugServer {
                     }
                 }
             } catch (IOException | ClassNotFoundException | InvocationTargetException |
-                     IllegalAccessException e) {
-                logger.error(e.getMessage(), e);
+                     IllegalAccessException ignored) {
             }
         });
         subscriberThread.setDaemon(true);
@@ -90,12 +89,21 @@ public class DebugServer {
             }
 
             @Override
+            public void stepInto() {
+                RemoteCall call = RemoteCall.builder().args(List.of()).methodName("stepInto").build();
+                try {
+                    stream.writeObject(call);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
             public void stepOver() {
                 RemoteCall call = RemoteCall.builder().args(List.of()).methodName("stepOver").build();
                 try {
                     stream.writeObject(call);
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
                 }
             }
 

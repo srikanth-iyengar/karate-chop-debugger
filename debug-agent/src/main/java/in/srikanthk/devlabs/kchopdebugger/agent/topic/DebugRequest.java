@@ -6,9 +6,13 @@ public interface DebugRequest {
     Topic<DebugRequest> TOPIC = Topic.createTopic("DebugRequestTopic", DebugRequest.class);
 
     void publishKarateVariables();
-    void stepOver();
+    void stepInto();
     void resume();
     void evaluateExpression(String expression);
     void addBreakpoint(String fileName, Integer lineNumber);
     void removeBreakpoint(String fileName, Integer lineNumber);
+
+    default void stepOver() {
+
+    }
 }

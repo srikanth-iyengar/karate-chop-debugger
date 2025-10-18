@@ -17,10 +17,8 @@ import `in`.srikanthk.devlabs.kchopdebugger.agent.communication.DebugServer
 import `in`.srikanthk.devlabs.kchopdebugger.agent.topic.DebugRequest
 import `in`.srikanthk.devlabs.kchopdebugger.agent.topic.DebugResponse
 import `in`.srikanthk.devlabs.kchopdebugger.configuration.KaratePropertiesState
-import `in`.srikanthk.devlabs.kchopdebugger.topic.BreakpointUpdatedTopic
 import `in`.srikanthk.devlabs.kchopdebugger.topic.DebuggerInfoRequestTopic
 import `in`.srikanthk.devlabs.kchopdebugger.topic.DebuggerInfoResponseTopic
-import io.ktor.util.collections.*
 import org.jetbrains.idea.maven.execution.MavenRunner
 import org.jetbrains.idea.maven.execution.MavenRunnerParameters
 import org.jetbrains.idea.maven.project.MavenProjectsManager
@@ -94,6 +92,10 @@ class KarateExecutionService(val project: Project) {
                     }
 
                     override fun stepForward() {
+                        remotePublisher.stepInto()
+                    }
+
+                    override fun stepOver() {
                         remotePublisher.stepOver()
                     }
 
