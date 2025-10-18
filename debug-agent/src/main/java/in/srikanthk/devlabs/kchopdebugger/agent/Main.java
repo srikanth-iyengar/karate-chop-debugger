@@ -127,7 +127,7 @@ public class Main {
         Map<String, Object> breakpoints = objectMapper.readValue(json, new TypeReference<>() {
         });
         breakpoints.forEach((key, value) -> {
-            if (key instanceof String) {
+            if (key != null) {
                 sessionState.getBreakpoints()
                         .computeIfAbsent(key, (k) -> new TreeSet<>())
                         .addAll((Collection<Integer>) value);

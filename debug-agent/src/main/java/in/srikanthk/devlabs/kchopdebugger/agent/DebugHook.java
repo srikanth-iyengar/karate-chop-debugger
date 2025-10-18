@@ -5,19 +5,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.karate.KarateException;
 import com.intuit.karate.RuntimeHook;
 import com.intuit.karate.Suite;
-import com.intuit.karate.core.*;
+import com.intuit.karate.core.ScenarioRuntime;
+import com.intuit.karate.core.Step;
+import com.intuit.karate.core.Variable;
 import in.srikanthk.devlabs.kchopdebugger.agent.topic.DebugRequest;
 import in.srikanthk.devlabs.kchopdebugger.agent.topic.DebugResponse;
+import org.apache.commons.lang3.Strings;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.apache.commons.lang3.StringUtils.removeStart;
 
 public class DebugHook implements RuntimeHook {
     private final Map<String, TreeSet<Integer>> breakpoints = SessionState.getInstance().getBreakpoints();
@@ -42,7 +41,7 @@ public class DebugHook implements RuntimeHook {
                 "%s/%s/%s",
                 sessionState.getProjectPath(),
                 JAVA_BASE_PATH,
-                removeStart(step.getFeature().getResource().getPrefixedPath(), CLASSPATH_COLON)
+                Strings.CS.removeStart(step.getFeature().getResource().getPrefixedPath(), CLASSPATH_COLON)
         );
         var lineSet = breakpoints.computeIfAbsent(filePath, (k) -> new TreeSet<>());
 
