@@ -44,7 +44,7 @@ class KarateStepAnnotator : Annotator {
         val children = element.node.getChildren(null)
         if (children.isEmpty()) return
 
-        val firstChild = children[0]
+        val firstChild = children[1]
         val firstPsi = firstChild.psi
         when (firstChild.elementType) {
             KarateTypes.STAR_STEP -> highlight(
@@ -61,8 +61,8 @@ class KarateStepAnnotator : Annotator {
         }
 
         // Highlight second child (step text)
-        if (children.size > 1) {
-            val list = children[1].getChildren(TokenSet.create(KarateTypes.WORD))
+        if (children.size > 2) {
+            val list = children[2].getChildren(TokenSet.create(KarateTypes.WORD))
             if (!list.isEmpty()) {
                 list.forEachIndexed { index, child ->
                     val secondPsi = child.psi

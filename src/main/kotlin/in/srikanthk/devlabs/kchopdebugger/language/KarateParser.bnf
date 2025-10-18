@@ -22,13 +22,13 @@ line ::= NEWLINE? (word | WS_KEY)+
 
 tags ::= NEWLINE? TAGS_KEY+
 
-background ::= (comment|tags)* BACKGROUND_KEYWORD description* (step | doc_string | table)*
+background ::= (comment|tags)* NEWLINE? BACKGROUND_KEYWORD description* (step | doc_string | table)*
 
-step ::= comment? (STAR_STEP | GIVEN_STEP | WHEN_STEP | THEN_STEP | AND_STEP | BUT_STEP) line*
+step ::= comment? NEWLINE? (STAR_STEP | GIVEN_STEP | WHEN_STEP | THEN_STEP | AND_STEP | BUT_STEP) line*
 
-scenario ::= (comment|tags)* SCENARIO_KEYWORD description? (step | doc_string | table)*
+scenario ::= (comment|tags)* NEWLINE? SCENARIO_KEYWORD description? (step | doc_string | table)*
 
-scenario_outline ::= (comment|tags)* SCENARIO_OUTLINE_KEYWORD description? (step | doc_string | table)* examples
+scenario_outline ::= (comment|tags)* NEWLINE? SCENARIO_OUTLINE_KEYWORD description? (step | doc_string | table)* examples
 
 examples ::= comment? EXAMPLES_KEYWORD table*
 

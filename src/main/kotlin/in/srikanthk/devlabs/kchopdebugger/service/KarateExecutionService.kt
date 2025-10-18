@@ -10,6 +10,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.xdebugger.XDebuggerManager
 import `in`.srikanthk.devlabs.kchopdebugger.agent.DebugMessageBus
 import `in`.srikanthk.devlabs.kchopdebugger.agent.DebuggerState
 import `in`.srikanthk.devlabs.kchopdebugger.agent.communication.DebugServer
@@ -23,14 +24,11 @@ import io.ktor.util.collections.*
 import org.jetbrains.idea.maven.execution.MavenRunner
 import org.jetbrains.idea.maven.execution.MavenRunnerParameters
 import org.jetbrains.idea.maven.project.MavenProjectsManager
-import java.io.BufferedReader
-import java.io.File
-import java.io.InputStreamReader
+import java.io.*
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.util.concurrent.ConcurrentSkipListSet
-import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.io.path.pathString
 
 @Service(Service.Level.PROJECT)
@@ -40,15 +38,25 @@ class KarateExecutionService(val project: Project) {
     private val runPropertiesService = KaratePropertiesState.getInstance(project)
     val notificationGroup = NotificationGroupManager.getInstance()
         .getNotificationGroup("Karate Chop Debugger Notification")
-    val breakpointUpdatePublisher: BreakpointUpdatedTopic? =
-        project.messageBus.syncPublisher(BreakpointUpdatedTopic.TOPIC)
     val projectBasePath = project.basePath + Constants.JAVA_BASE_PATH
+    val breakpointManager = XDebuggerManager.getInstance(project).breakpointManager
 
-    private val breakpoints: MutableMap<String, ConcurrentSkipListSet<Int>> = ConcurrentMap();
     private var process: Process? = null
     var lastExecutedFileName: String? = null
+    var lastScenarioName: String? = null
 
-    fun executeSuite(fileName: String) {
+    fun getBreakpoints() : Map<String, ConcurrentSkipListSet<*>>{
+        val breakpoints = HashMap<String, ConcurrentSkipListSet<Int>>()
+        breakpointManager.allBreakpoints.forEach {
+            it.sourcePosition?.let { sourcePosition ->
+                val list = breakpoints.computeIfAbsent(sourcePosition.file.path) { ConcurrentSkipListSet() };
+                list.add(sourcePosition.line + 1)
+            }
+        }
+        return breakpoints
+    }
+
+    fun executeSuite(fileName: String, scenarioName: String?) {
         if(this.process != null) {
             notificationGroup
                 .createNotification(
@@ -58,12 +66,13 @@ class KarateExecutionService(val project: Project) {
             return
         }
         this.lastExecutedFileName = fileName
+        this.lastScenarioName = scenarioName
         buildMavenProject {
             ApplicationManager.getApplication().executeOnPooledThread {
                 val featureClasspath = fileName.substring(projectBasePath.length + 1)
 
                 val urls = getMavenDependenciesURL().joinToString(";");
-                val breakpointJson = mapper.writeValueAsString(breakpoints)
+                val breakpointJson = mapper.writeValueAsString(getBreakpoints())
                 val breakpointPath = Files.createTempFile("breakpoints_", ".json")
                 Files.writeString(
                     breakpointPath,
@@ -114,11 +123,11 @@ class KarateExecutionService(val project: Project) {
                     append("-Ddebug.port=${debugServer.port}")
                 }.trim()
 
-                val options = "$vmOptions -jar ${getAgentJarFile().path} $featureClasspath ${project.basePath} $breakpointPath $urls"
+                val options = "$vmOptions -jar ${getAgentJarFile().path} $featureClasspath ${project.basePath} $breakpointPath $urls ${scenarioName ?: ""}"
                 val argumentPath = Files.createTempFile("argument", ".txt")
                 Files.writeString(
                     argumentPath,
-                    options,
+                    options.trim(),
                     StandardOpenOption.TRUNCATE_EXISTING,
                     StandardOpenOption.CREATE,
                     StandardOpenOption.WRITE
@@ -169,29 +178,6 @@ class KarateExecutionService(val project: Project) {
         return Paths.get(javaHome, "bin", "java").toString()
     }
 
-    fun addBreakpoint(file: String, lineNumber: Int) {
-        breakpoints.computeIfAbsent(file) { ConcurrentSkipListSet() }.add(lineNumber)
-        breakpointUpdatePublisher?.updatedBreakpoint()
-        val remotePublisher = DebugMessageBus.getInstance().publisher(DebugRequest.TOPIC)
-        remotePublisher.addBreakpoint(file, lineNumber)
-    }
-
-    fun toggleBreakpoint(file: String, lineNumber: Int) {
-        val breakpointSet = breakpoints.computeIfAbsent(file) { ConcurrentSkipListSet() }
-        if(breakpointSet.contains(lineNumber)) {
-            this.removeBreakpoint(file, lineNumber)
-        } else {
-            this.addBreakpoint(file, lineNumber)
-        }
-    }
-
-    fun removeBreakpoint(file: String, lineNumber: Int) {
-        breakpoints[file]?.remove(lineNumber)
-        breakpointUpdatePublisher?.updatedBreakpoint()
-        val remotePublisher = DebugMessageBus.getInstance().publisher(DebugRequest.TOPIC)
-        remotePublisher.removeBreakpoint(file, lineNumber)
-    }
-
     fun stop() {
         process?.destroyForcibly()
         process = null
@@ -199,7 +185,7 @@ class KarateExecutionService(val project: Project) {
     }
 
     fun rerun() {
-        lastExecutedFileName?.let { executeSuite(it) }
+        lastExecutedFileName?.let { executeSuite(it, this.lastScenarioName) }
     }
 
     private fun buildMavenProject(callback: Runnable): Boolean {
@@ -216,60 +202,6 @@ class KarateExecutionService(val project: Project) {
         }
 
         val mavenProject = mavenProjects.first()
-
-        try {
-            val hasTestJarGoal = mavenProject.plugins.any { plugin ->
-                plugin.artifactId == "maven-jar-plugin" &&
-                        plugin.executions.any { exec ->
-                            exec.goals.contains("test-jar")
-                        }
-            }
-
-            if (!hasTestJarGoal) {
-                val pluginSnippet = """
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>$\{maven-jar-plugin-version}</version>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>test-jar</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-            """.trimIndent()
-
-                val notification = notificationGroup
-                    .createNotification(
-                        "Missing test-jar configuration",
-                        """
-                    The <b>maven-jar-plugin</b> in your project does not define the <b>test-jar</b> goal.<br><br>
-                    Add the following snippet to your <code>pom.xml</code> under <code>&lt;plugins&gt;</code>:
-                    """.trimIndent(),
-                        NotificationType.ERROR
-                    )
-
-                notification.addAction(
-                    com.intellij.notification.NotificationAction.createSimpleExpiring("Copy Plugin Snippet") {
-                        val clipboard = java.awt.Toolkit.getDefaultToolkit().systemClipboard
-                        val selection = java.awt.datatransfer.StringSelection(pluginSnippet)
-                        clipboard.setContents(selection, selection)
-                    }
-                )
-
-                notification.notify(project)
-                return false
-            }
-
-        } catch (e: Exception) {
-            notificationGroup.createNotification(
-                "Error Checking Maven Goals",
-                "Unable to verify maven-jar-plugin goals: ${e.message}",
-                NotificationType.WARNING
-            ).notify(project)
-        }
 
         // ✅ Continue Maven build
         val runner = MavenRunner.getInstance(project)
@@ -289,33 +221,15 @@ class KarateExecutionService(val project: Project) {
     private fun getMavenDependenciesURL(): List<String> {
         val mavenProjectManager = MavenProjectsManager.getInstance(project);
         val dependencies = ArrayList(mavenProjectManager.projects[0].dependencies.map { dep -> dep.file.path });
-        dependencies.add(File(getJarPath()).path);
+        dependencies.add(File(getTestClassesPath()).path);
 
         return dependencies
     }
 
-    private fun getJarPath(): String {
-        val file = File("${project.basePath}", "pom.xml")
-        val dbFactory = DocumentBuilderFactory.newInstance()
-        val dBuilder = dbFactory.newDocumentBuilder()
-        val doc = dBuilder.parse(file)
+    private fun getTestClassesPath(): String {
+        val testClassDir = File(File(project.basePath, "target"), "test-classes")
 
-        val artifactId = doc.getElementsByTagName("artifactId").item(0).textContent
-        val version = doc.getElementsByTagName("version").item(0).textContent
-
-        val testJarFileName = "$artifactId-$version-tests.jar"
-
-        val jarFile = File(File(project.basePath, "target"), testJarFileName)
-
-        return jarFile.path.toString()
-    }
-
-    fun isBreakpointPlaced(file: String, lineNumber: Int): Boolean {
-        return breakpoints[file]?.contains(lineNumber) ?: false
-    }
-
-    fun getBreakpoints(): Map<String, ConcurrentSkipListSet<Int>> {
-        return breakpoints
+        return testClassDir.path.toString()
     }
 
     fun createRemoteCallSubscriber(): DebugResponse {

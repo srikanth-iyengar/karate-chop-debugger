@@ -33,7 +33,6 @@ public class Main {
             logger.error("Expected arguments: <featureClassPath> <projectBasePath> <breakpointsJson> <classpathUrls>");
             System.exit(1);
         }
-
         final String featureClassPath = args[0];
         final String projectBasePath = args[1];
         final String breakpointsJson = args[2];
@@ -84,7 +83,11 @@ public class Main {
             });
             var th = new Thread(() -> {
                 try {
-                    executeSuite(customLoader);
+                    String scenarioPatten = null;
+                    if (args.length > 4) {
+                        scenarioPatten = args[4];
+                    }
+                    executeSuite(customLoader, Optional.ofNullable(scenarioPatten));
                 } catch (Exception e) {
                     responsePublisher.appendLog(getStackTraceAsString(e), false);
                 }
@@ -136,14 +139,18 @@ public class Main {
         return new URLClassLoader(jars.toArray(new URL[0]), Thread.currentThread().getContextClassLoader());
     }
 
-    private static void executeSuite(ClassLoader loader) {
-        Runner.builder()
-                .path("classpath:" + sessionState.getFeatureClassPath())
-                .hook(new DebugHook())
-                .backupReportDir(false)
-                .classLoader(loader)
-                .reportDir(new File(sessionState.getProjectPath(), "karate-report").getAbsolutePath())
-                .parallel(1);
+    private static void executeSuite(ClassLoader loader, Optional<String> scenarioPatten) throws IOException {
+        Runner.Builder<?> builder =
+                Runner.builder()
+                        .path("classpath:" + sessionState.getFeatureClassPath())
+                        .hook(new DebugHook())
+                        .backupReportDir(false)
+                        .classLoader(loader)
+                        .reportDir(new File(sessionState.getProjectPath(), "karate-report").getAbsolutePath());
+        if (scenarioPatten.isPresent()) {
+            builder = builder.scenarioName(scenarioPatten.get());
+        }
+        builder.parallel(1);
     }
 
     public static String getStackTraceAsString(Throwable t) {

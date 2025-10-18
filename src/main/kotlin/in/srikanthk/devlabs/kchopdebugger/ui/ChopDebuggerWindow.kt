@@ -35,7 +35,6 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
 
     private val debugVarsPanel = DebugVariableTable(project)
     private val logViewPanel = LogViewPanel(project)
-    private val breakpointsPanel = BreakpointEditorPanel(project)
     private val tabbedPane = JBTabbedPane()
     private val karatePropertiesPanel = PropertiesEditorPanel(project)
     private var state: DebuggerState = DebuggerState.Finished
@@ -100,7 +99,6 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
         tabbedPane.apply {
             addTab("Variables", debugVarsPanel)
             addTab("Logs", logViewPanel)
-            addTab("Breakpoints", breakpointsPanel)
             addTab("Run Properties", karatePropertiesPanel)
         }
 
@@ -143,7 +141,7 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
 
         if (state == DebuggerState.Started) {
             ToolWindowManager.getInstance(project).getToolWindow("Karate Chop Debugger")?.show()
-            this.tabbedPane.selectedIndex = 0
+            this.tabbedPane.selectedIndex = 1
         }
     }
 

@@ -110,13 +110,6 @@ public class DebugHook implements RuntimeHook {
         return RuntimeHook.super.beforeStep(step, sr);
     }
 
-    @Override
-    public void afterStep(StepResult result, ScenarioRuntime sr) {
-        if (result.getStepLog() != null && !result.getStepLog().isEmpty()) {
-            responsePublisher.appendLog(result.getStepLog(), result.isFailed());
-        }
-    }
-
     public void publishKarateVariablesSerializabel(Map<String, Variable> vars) {
         HashMap<String, String> mp = new HashMap<>();
         ObjectMapper mapper = new ObjectMapper();
@@ -132,19 +125,5 @@ public class DebugHook implements RuntimeHook {
         }
 
         responsePublisher.updateKarateVariable(mp);
-    }
-
-    @Override
-    public void afterSuite(Suite suite) {
-        String reportPath = String.format("%s/karate-summary.html", new File(suite.reportDir).toPath().toUri());
-        responsePublisher.appendLog(String.format("Karate report: %s", reportPath), true);
-        responsePublisher.updateState(DebuggerState.Finished);
-    }
-
-    @Override
-    public void afterFeature(FeatureRuntime fr) {
-        if(fr.result.isFailed()) {
-            this.responsePublisher.appendLog(fr.result.getErrorMessages(), false);
-        }
     }
 }

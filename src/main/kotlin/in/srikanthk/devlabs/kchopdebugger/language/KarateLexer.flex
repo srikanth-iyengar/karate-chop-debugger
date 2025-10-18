@@ -50,17 +50,17 @@ WORD_NON_WS = [^ \t\r\n]
   {BOL}+"\"\"\""                             { yybegin(DOC_STRING_BLOCK); return DOC_STRING_START; }
 
   "|" {CHAR}+                                 { return TABLE_ROW; }
-  {BOL}+ "Background:"                        { return BACKGROUND_KEYWORD; }
-  {BOL}+ "Scenario:"                          { return SCENARIO_KEYWORD; }
-  {BOL}+ "Scenario Outline:"                  { return SCENARIO_OUTLINE_KEYWORD; }
+  "Background:"                        { return BACKGROUND_KEYWORD; }
+  "Scenario:"                          { return SCENARIO_KEYWORD; }
+  "Scenario Outline:"                  { return SCENARIO_OUTLINE_KEYWORD; }
   {BOL}+ "Examples:"                          { return EXAMPLES_KEYWORD; }
 
-  {BOL}+ "*"                                  { return STAR_STEP; }
-  {BOL}+ "Given"                              { return GIVEN_STEP; }
-  {BOL}+ "When"                               { return WHEN_STEP; }
-  {BOL}+ "Then"                               { return THEN_STEP; }
-  {BOL}+ "And"                                { return AND_STEP; }
-  {BOL}+ "But"                                { return BUT_STEP; }
+  "*"                                  { return STAR_STEP; }
+  "Given"                              { return GIVEN_STEP; }
+  "When"                               { return WHEN_STEP; }
+  "Then"                               { return THEN_STEP; }
+  "And"                                { return AND_STEP; }
+  "But"                                { return BUT_STEP; }
   {BOL}+ "#" {CHAR}*                          { return COMMENT_STMT; }
 
   "@" {CHAR}+                                 { return TAGS_KEY; }
