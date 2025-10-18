@@ -5,11 +5,10 @@ plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm") version "2.1.0"
     id("org.jetbrains.intellij.platform") version "2.5.0"
-    id("com.javiersc.semver.project") version "0.7.1"
 }
 
 group = "in.srikanthk.devlabs"
-version = "2.2.1"
+version = "2.2.4"
 
 repositories {
     mavenCentral()
@@ -95,9 +94,4 @@ tasks.named<ProcessResources>("processResources") {
         into("lib")
         rename { "agent.jar" }
     }
-}
-
-semver {
-    tagPrefix = "v"
-    isEnabled = true
 }
