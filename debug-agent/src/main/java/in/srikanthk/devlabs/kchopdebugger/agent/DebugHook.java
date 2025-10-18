@@ -126,4 +126,10 @@ public class DebugHook implements RuntimeHook {
 
         responsePublisher.updateKarateVariable(mp);
     }
+
+    @Override
+    public void afterSuite(Suite suite) {
+        this.responsePublisher.updateState(DebuggerState.Finished);
+    }
+
 }
