@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "in.srikanthk.devlabs"
-version = "2.2.6"
+version = "2.2.0"
 
 repositories {
     mavenCentral()
@@ -38,7 +38,6 @@ intellijPlatform {
         changeNotes = """
             <html>
               <body>
-                <h2>What's New in 2.2.6</h2>
                 <ul>
                   <li><b>Run individual scenarios</b> directly from the editor with the Run icon.</li>
                   <li><b>Seamless IntelliJ breakpoint integration</b> – no manual setup needed.</li>

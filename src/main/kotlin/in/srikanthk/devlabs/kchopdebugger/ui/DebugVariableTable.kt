@@ -1,6 +1,8 @@
 package `in`.srikanthk.devlabs.kchopdebugger.ui
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonParser
 import com.intellij.json.JsonFileType
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.EditorFactory
@@ -19,7 +21,6 @@ import java.awt.BorderLayout
 import java.awt.Cursor
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
-import java.util.*
 import javax.swing.*
 import javax.swing.table.DefaultTableModel
 
@@ -134,8 +135,8 @@ class DebugVariableTable(private val project: Project) : JPanel(BorderLayout()) 
         val editorFactory = EditorFactory.getInstance()
 
         val prettyJson = try {
-            val jsonNode = objectMapper.readTree(json)
-            jsonNode.toPrettyString()
+            val jsonNode = JsonParser.parseString(json)
+            GsonBuilder().setPrettyPrinting().create().toJson(jsonNode)
         } catch (e: Exception) {
             json // Not a valid JSON, show as is
         }
