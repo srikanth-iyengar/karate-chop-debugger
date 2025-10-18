@@ -13,7 +13,9 @@
 
 Watch the plugin in action:
 
-https://github.com/user-attachments/assets/0727b017-f2d6-4ccb-b338-9c28b6f4ef45
+
+https://github.com/user-attachments/assets/97a5d920-f316-404a-b05a-0900b020c046
+
 
 ---
 
