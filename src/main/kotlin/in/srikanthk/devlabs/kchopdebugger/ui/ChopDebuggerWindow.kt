@@ -9,19 +9,15 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.colors.EditorColorsManager
-import com.intellij.openapi.editor.impl.DocumentMarkupModel
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
-import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.IdeBorderFactory
-import com.intellij.ui.Side
 import com.intellij.ui.components.JBTabbedPane
-import com.intellij.util.ui.UIUtil
 import com.intellij.xdebugger.ui.DebuggerColors
 import `in`.srikanthk.devlabs.kchopdebugger.agent.DebuggerState
 import `in`.srikanthk.devlabs.kchopdebugger.service.KarateExecutionService
@@ -53,11 +49,20 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
         }
     }
 
-    private val stepOverAction = object : AnAction("Step Over", "Step Over", AllIcons.Actions.TraceInto) {
+    private val stepIntoAction = object : AnAction("Step Into", "Step Into", AllIcons.Actions.TraceInto) {
         override fun actionPerformed(e: AnActionEvent) {
             publisher?.stepForward()
         }
 
+        override fun update(e: AnActionEvent) {
+            e.presentation.isEnabled = state == DebuggerState.Halted
+        }
+    }
+
+    private val stepOverAction = object : AnAction("Step Over", "Step Over", AllIcons.Actions.TraceOver) {
+        override fun actionPerformed(e: AnActionEvent) {
+            publisher?.stepOver()
+        }
         override fun update(e: AnActionEvent) {
             e.presentation.isEnabled = state == DebuggerState.Halted
         }
@@ -84,7 +89,7 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
     }
 
     init {
-        val actionGroup = DefaultActionGroup(rerunAction, resumeAction, stepOverAction, stopAction)
+        val actionGroup = DefaultActionGroup(rerunAction, resumeAction, stepOverAction, stepIntoAction, stopAction)
         val actionToolbar = ActionManager.getInstance().createActionToolbar(
             "KarateDebuggerToolbar", actionGroup, false
         ).apply {
@@ -156,6 +161,12 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
     }
 
     private fun focusTo(filePath: String, lineNumber: Int) {
+        val editor = FileEditorManager.getInstance(project).selectedTextEditor
+        editor?.let {
+            editor.virtualFile?.let { file ->
+                cleanupMarkups(file.path)
+            }
+        }
         val virtualFile = LocalFileSystem.getInstance().findFileByPath(filePath)
 
         if (virtualFile != null) {

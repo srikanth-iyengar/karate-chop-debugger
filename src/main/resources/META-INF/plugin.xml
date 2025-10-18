@@ -79,6 +79,11 @@
         <action id="in.srikanthk.devlabs.kchopdebugger.action.StepIntoAction"
                 class="in.srikanthk.devlabs.kchopdebugger.action.StepIntoAction" text="Step Into">
             <add-to-group group-id="EditorPopupMenu" anchor="last" />
+            <keyboard-shortcut first-keystroke="F7" keymap="$default" />
+        </action>
+        <action id="in.srikanthk.devlabs.kchopdebugger.action.StepOverAction"
+                class="in.srikanthk.devlabs.kchopdebugger.action.StepOverAction" text="Step Over">
+            <add-to-group group-id="EditorPopupMenu" anchor="last" />
             <keyboard-shortcut first-keystroke="F8" keymap="$default" />
         </action>
     </actions>

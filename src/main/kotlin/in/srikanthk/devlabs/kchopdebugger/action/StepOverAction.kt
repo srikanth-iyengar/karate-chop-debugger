@@ -7,10 +7,10 @@ import com.intellij.psi.PsiDocumentManager
 import `in`.srikanthk.devlabs.kchopdebugger.language.KarateLanguage
 import `in`.srikanthk.devlabs.kchopdebugger.topic.DebuggerInfoRequestTopic
 
-class StepIntoAction: AnAction() {
+class StepOverAction: AnAction() {
     override fun actionPerformed(action: AnActionEvent) {
         val publisher =  action.project?.messageBus?.syncPublisher(DebuggerInfoRequestTopic.TOPIC)
-        publisher?.stepForward()
+        publisher?.stepOver()
     }
 
     override fun update(action: AnActionEvent) {

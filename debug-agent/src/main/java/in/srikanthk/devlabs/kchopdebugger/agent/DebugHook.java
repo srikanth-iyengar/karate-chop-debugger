@@ -5,15 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.karate.KarateException;
 import com.intuit.karate.RuntimeHook;
 import com.intuit.karate.Suite;
-import com.intuit.karate.core.ScenarioRuntime;
-import com.intuit.karate.core.Step;
-import com.intuit.karate.core.Variable;
+import com.intuit.karate.core.*;
 import in.srikanthk.devlabs.kchopdebugger.agent.topic.DebugRequest;
 import in.srikanthk.devlabs.kchopdebugger.agent.topic.DebugResponse;
 import org.apache.commons.lang3.Strings;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -24,6 +23,8 @@ public class DebugHook implements RuntimeHook {
     private final DebugResponse responsePublisher = DebugMessageBus.getInstance().publisher(DebugResponse.TOPIC);
     private final DebugMessageBus messageBus = DebugMessageBus.getInstance();
     private final SessionState sessionState = SessionState.getInstance();
+    private Scenario stepOverScenario;
+    private boolean doingStepOver = false;
 
     private static final String JAVA_BASE_PATH = "src/test/java";
     private static final String CLASSPATH_COLON = "classpath:";
@@ -35,6 +36,15 @@ public class DebugHook implements RuntimeHook {
 
     @Override
     public boolean beforeStep(Step step, ScenarioRuntime sr) {
+        if(doingStepOver) {
+            if(sr.scenario == stepOverScenario) {
+                stopOnNextStep.set(true);
+                stepOverScenario = null;
+                doingStepOver = false;
+            } else {
+                return true;
+            }
+        }
         var startLine = step.getLine();
         var endLine = step.getLine();
         var filePath = String.format(
@@ -64,7 +74,7 @@ public class DebugHook implements RuntimeHook {
                 }
 
                 @Override
-                public void stepOver() {
+                public void stepInto() {
                     stopOnNextStep.set(true);
                     latch.countDown();
                 }
@@ -93,6 +103,13 @@ public class DebugHook implements RuntimeHook {
 
                 @Override
                 public void removeBreakpoint(String fileName, Integer lineNumber) {
+                }
+
+                @Override
+                public void stepOver() {
+                    stepOverScenario = sr.scenario;
+                    doingStepOver = true;
+                    latch.countDown();
                 }
             };
             messageBus.subscribe(DebugRequest.TOPIC, listener);
@@ -124,6 +141,15 @@ public class DebugHook implements RuntimeHook {
         }
 
         responsePublisher.updateKarateVariable(mp);
+    }
+
+    @Override
+    public void afterScenario(ScenarioRuntime sr) {
+        if(doingStepOver) {
+            doingStepOver = false;
+            this.stopOnNextStep.set(true);
+        }
+        RuntimeHook.super.afterScenario(sr);
     }
 
     @Override
