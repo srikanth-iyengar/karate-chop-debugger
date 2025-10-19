@@ -39,7 +39,7 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
     val notificationGroup = NotificationGroupManager.getInstance()
         .getNotificationGroup("Karate Chop Debugger Notification")
 
-    private val resumeAction = object : AnAction("Resume", "Resume Execution", AllIcons.Actions.Resume) {
+    private val resumeAction = object : AnAction("Resume", "Resume execution", AllIcons.Actions.Resume) {
         override fun actionPerformed(e: AnActionEvent) {
             publisher?.resume()
         }
@@ -78,7 +78,7 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
         }
     }
 
-    private val rerunAction = object : AnAction("Rerun", "Rerun execution", AllIcons.Actions.Restart) {
+    private val rerunAction = object : AnAction("Rerun", "Rerun execution", AllIcons.Actions.RestartDebugger) {
         override fun actionPerformed(e: AnActionEvent) {
             karateExecutionService.rerun()
         }
@@ -98,7 +98,7 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
         }
     }
 
-    private val hotReload = object: AnAction("Step Back", "Step back", AllIcons.Actions.BuildLoadChanges) {
+    private val hotReload = object: AnAction("Hot Reload Scenario", "Hot reloads current scenario in execution", AllIcons.Actions.BuildLoadChanges) {
         override fun actionPerformed(e: AnActionEvent) {
             karateExecutionService.hotReload() {
                 publisher?.hotReload()
@@ -106,6 +106,12 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
                     ToolWindowManager.getInstance(project).getToolWindow("Karate Chop Debugger")?.show()
                     tabbedPane.selectedIndex = 0
                 }
+
+                notificationGroup.createNotification(
+                    "Hot reload completed",
+                    "Current scenario execution reloaded, no new steps will be added for execution",
+                    NotificationType.INFORMATION
+                ).notify(project)
             }
         }
 
