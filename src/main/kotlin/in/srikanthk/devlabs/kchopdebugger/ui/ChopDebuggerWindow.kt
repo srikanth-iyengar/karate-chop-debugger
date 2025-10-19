@@ -49,7 +49,7 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
         }
     }
 
-    private val stepIntoAction = object : AnAction("Step Into", "Step Into", AllIcons.Actions.TraceInto) {
+    private val stepIntoAction = object : AnAction("Step Into", "Step into", AllIcons.Actions.TraceInto) {
         override fun actionPerformed(e: AnActionEvent) {
             publisher?.stepForward()
         }
@@ -59,7 +59,7 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
         }
     }
 
-    private val stepOverAction = object : AnAction("Step Over", "Step Over", AllIcons.Actions.TraceOver) {
+    private val stepOverAction = object : AnAction("Step Over", "Step over", AllIcons.Actions.TraceOver) {
         override fun actionPerformed(e: AnActionEvent) {
             publisher?.stepOver()
         }
@@ -68,7 +68,7 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
         }
     }
 
-    private val stopAction = object : AnAction("Stop", "Stop Execution", AllIcons.Actions.Suspend) {
+    private val stopAction = object : AnAction("Stop", "Stop execution", AllIcons.Actions.Suspend) {
         override fun actionPerformed(e: AnActionEvent) {
             karateExecutionService.stop()
         }
@@ -78,7 +78,7 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
         }
     }
 
-    private val rerunAction = object : AnAction("Rerun", "Rerun Execution", AllIcons.Actions.Restart) {
+    private val rerunAction = object : AnAction("Rerun", "Rerun execution", AllIcons.Actions.Restart) {
         override fun actionPerformed(e: AnActionEvent) {
             karateExecutionService.rerun()
         }
@@ -88,8 +88,34 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
         }
     }
 
+    private val stepBackAction = object: AnAction("Step Back", "Step back", AllIcons.Actions.Back) {
+        override fun actionPerformed(e: AnActionEvent) {
+            publisher?.stepBack()
+        }
+
+        override fun update(e: AnActionEvent) {
+            e.presentation.isEnabled = state == DebuggerState.Halted
+        }
+    }
+
+    private val hotReload = object: AnAction("Step Back", "Step back", AllIcons.Actions.BuildLoadChanges) {
+        override fun actionPerformed(e: AnActionEvent) {
+            karateExecutionService.hotReload() {
+                publisher?.hotReload()
+                WriteCommandAction.runWriteCommandAction(project) {
+                    ToolWindowManager.getInstance(project).getToolWindow("Karate Chop Debugger")?.show()
+                    tabbedPane.selectedIndex = 0
+                }
+            }
+        }
+
+        override fun update(e: AnActionEvent) {
+            e.presentation.isEnabled = state == DebuggerState.Halted
+        }
+    }
+
     init {
-        val actionGroup = DefaultActionGroup(rerunAction, resumeAction, stepOverAction, stepIntoAction, stopAction)
+        val actionGroup = DefaultActionGroup(rerunAction, resumeAction, stepOverAction, stepIntoAction, stepBackAction, hotReload, stopAction)
         val actionToolbar = ActionManager.getInstance().createActionToolbar(
             "KarateDebuggerToolbar", actionGroup, false
         ).apply {

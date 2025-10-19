@@ -5,14 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.karate.KarateException;
 import com.intuit.karate.RuntimeHook;
 import com.intuit.karate.Suite;
-import com.intuit.karate.core.*;
+import com.intuit.karate.core.Scenario;
+import com.intuit.karate.core.ScenarioRuntime;
+import com.intuit.karate.core.Step;
+import com.intuit.karate.core.Variable;
 import in.srikanthk.devlabs.kchopdebugger.agent.topic.DebugRequest;
 import in.srikanthk.devlabs.kchopdebugger.agent.topic.DebugResponse;
 import org.apache.commons.lang3.Strings;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Stack;
 import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -59,6 +61,7 @@ public class DebugHook implements RuntimeHook {
                 lineSet.contains(startLine) || (lineSet.ceiling(startLine) != null && lineSet.ceiling(startLine) <= endLine && lineSet.floor(
                         endLine
                 ) != null && lineSet.floor(endLine) >= startLine);
+        AtomicBoolean stepBack = new AtomicBoolean(false);
 
         if (shouldHalt || stopOnNextStep.get()) {
             responsePublisher.navigateTo(filePath, startLine);
@@ -98,18 +101,24 @@ public class DebugHook implements RuntimeHook {
                 }
 
                 @Override
-                public void addBreakpoint(String fileName, Integer lineNumber) {
-                }
-
-                @Override
-                public void removeBreakpoint(String fileName, Integer lineNumber) {
-                }
-
-                @Override
                 public void stepOver() {
                     stepOverScenario = sr.scenario;
                     doingStepOver = true;
                     latch.countDown();
+                }
+
+                @Override
+                public void stepBack() {
+                    sr.stepBack();
+                    stepBack.set(true);
+                    stopOnNextStep.set(true);
+                    latch.countDown();
+                }
+
+                @Override
+                public void hotReload() {
+                    sr.hotReload();
+                    publishKarateVariablesSerializabel(sr.engine.vars);
                 }
             };
             messageBus.subscribe(DebugRequest.TOPIC, listener);
@@ -121,6 +130,10 @@ public class DebugHook implements RuntimeHook {
             }
             responsePublisher.updateState(DebuggerState.Running);
             messageBus.unsubscribe(DebugRequest.TOPIC, listener);
+        }
+
+        if(stepBack.get()) {
+            return false;
         }
 
         return RuntimeHook.super.beforeStep(step, sr);

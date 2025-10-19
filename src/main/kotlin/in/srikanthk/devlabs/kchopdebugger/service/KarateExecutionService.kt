@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
+import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.extensions.PluginId
@@ -60,6 +62,12 @@ class KarateExecutionService(val project: Project) {
                 .createNotification(
                     "Debugger already running",
                     "A debugging session is already in progress. Stop it before starting a new one.",NotificationType.WARNING)
+                .addAction(object: AnAction("Stop And Run") {
+                    override fun actionPerformed(p0: AnActionEvent) {
+                        stop()
+                        executeSuite(fileName, scenarioName)
+                    }
+                })
                 .notify(project)
             return
         }
@@ -113,6 +121,14 @@ class KarateExecutionService(val project: Project) {
 
                     override fun removeBreakpoint(fileName: String, lineNumber: Int) {
                         remotePublisher.removeBreakpoint(fileName, lineNumber)
+                    }
+
+                    override fun stepBack() {
+                        remotePublisher.stepBack()
+                    }
+
+                    override fun hotReload() {
+                        remotePublisher.hotReload()
                     }
                 })
 
@@ -196,7 +212,7 @@ class KarateExecutionService(val project: Project) {
 
         if (mavenProjects.isEmpty()) {
             notificationGroup.createNotification(
-                "Karate Chop Error",
+                "Karate chop error",
                 "No Maven projects detected",
                 NotificationType.ERROR
             ).notify(project)
@@ -218,6 +234,10 @@ class KarateExecutionService(val project: Project) {
 
         runner.run(parameters, null, callback)
         return true
+    }
+
+    public fun hotReload(callback: Runnable) {
+        buildMavenProject(callback)
     }
 
     private fun getMavenDependenciesURL(): List<String> {
@@ -267,7 +287,6 @@ class KarateExecutionService(val project: Project) {
             ) {
                 responsePublisher.evaluateExpressionResult(result, error)
             }
-
         }
     }
 

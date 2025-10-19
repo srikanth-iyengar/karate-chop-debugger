@@ -30,7 +30,7 @@
         <xdebugger.breakpointType implementation="in.srikanthk.devlabs.kchopdebugger.language.KarateDebugStepPoint" />
         <lang.commenter language="karate-dsl" implementationClass="in.srikanthk.devlabs.kchopdebugger.language.KarateCommenter" />
         <toolWindow factoryClass="in.srikanthk.devlabs.kchopdebugger.ui.DebugToolWindowFactory"
-                    id="Karate Chop Debugger" secondary="true" anchor="left"
+                    id="Karate Chop Debugger" secondary="true" anchor="bottom"
                     icon="AllIcons.Toolwindows.ToolWindowInspection"/>
         <runLineMarkerContributor language="karate-dsl"
                                   implementationClass="in.srikanthk.devlabs.kchopdebugger.language.KarateRunLineMarkerContributor"

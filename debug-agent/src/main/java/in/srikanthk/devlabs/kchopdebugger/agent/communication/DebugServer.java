@@ -14,9 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.rmi.Remote;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class DebugServer {
     private static final DebugServer INSTANCE = new DebugServer();
@@ -76,77 +74,66 @@ public class DebugServer {
 
     public void registerForwarder() throws IOException {
         this.requestForwarder = new DebugRequest() {
-            ObjectOutputStream stream = new ObjectOutputStream(socket.getOutputStream());
+            final ObjectOutputStream stream = new ObjectOutputStream(socket.getOutputStream());
 
-            @Override
-            public void publishKarateVariables() {
-                RemoteCall call = RemoteCall.builder().args(List.of()).methodName("publishKarateVariables").build();
+            private void sendCall(String methodName, Object... args) {
+                RemoteCall call = RemoteCall.builder()
+                        .methodName(methodName)
+                        .args(List.of(args))
+                        .build();
                 try {
                     stream.writeObject(call);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
+            }
+
+            @Override
+            public void publishKarateVariables() {
+                sendCall("publishKarateVariables");
             }
 
             @Override
             public void stepInto() {
-                RemoteCall call = RemoteCall.builder().args(List.of()).methodName("stepInto").build();
-                try {
-                    stream.writeObject(call);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                sendCall("stepInto");
             }
 
             @Override
             public void stepOver() {
-                RemoteCall call = RemoteCall.builder().args(List.of()).methodName("stepOver").build();
-                try {
-                    stream.writeObject(call);
-                } catch (IOException e) {
-                }
+                sendCall("stepOver");
             }
 
             @Override
             public void resume() {
-                RemoteCall call = RemoteCall.builder().args(List.of()).methodName("resume").build();
-                try {
-                    stream.writeObject(call);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                sendCall("resume");
             }
 
             @Override
             public void evaluateExpression(String expression) {
-                RemoteCall call = RemoteCall.builder().args(List.of(expression)).methodName("evaluateExpression").build();
-                try {
-                    stream.writeObject(call);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                sendCall("evaluateExpression", expression);
             }
 
             @Override
             public void addBreakpoint(String fileName, Integer lineNumber) {
-                RemoteCall call = RemoteCall.builder().args(List.of(fileName, lineNumber)).methodName("addBreakpoint").build();
-                try {
-                    stream.writeObject(call);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                sendCall("addBreakpoint", fileName, lineNumber);
             }
 
             @Override
             public void removeBreakpoint(String fileName, Integer lineNumber) {
-                RemoteCall call = RemoteCall.builder().args(List.of(fileName, lineNumber)).methodName("removeBreakpoint").build();
-                try {
-                    stream.writeObject(call);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                sendCall("removeBreakpoint", fileName, lineNumber);
+            }
+
+            @Override
+            public void stepBack() {
+                sendCall("stepBack");
+            }
+
+            @Override
+            public void hotReload() {
+                sendCall("hotReload");
             }
         };
+
         DebugMessageBus.getInstance().subscribe(DebugRequest.TOPIC, requestForwarder);
     }
 

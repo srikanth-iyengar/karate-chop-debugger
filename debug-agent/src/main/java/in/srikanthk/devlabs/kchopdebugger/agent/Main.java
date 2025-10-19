@@ -50,26 +50,6 @@ public class Main {
 
             DebugMessageBus.getInstance().subscribe(DebugRequest.TOPIC, new DebugRequest() {
                 @Override
-                public void publishKarateVariables() {
-
-                }
-
-                @Override
-                public void stepInto() {
-
-                }
-
-                @Override
-                public void resume() {
-
-                }
-
-                @Override
-                public void evaluateExpression(String expression) {
-
-                }
-
-                @Override
                 public void addBreakpoint(String fileName, Integer lineNumber) {
                     var breakpoints = SessionState.getInstance().getBreakpoints();
                     breakpoints.computeIfAbsent(fileName, k -> new TreeSet<>()).add(lineNumber);
