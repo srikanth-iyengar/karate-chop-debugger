@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Get the latest tag (sorted by creation date)
 last_version=$(git tag --sort=-creatordate | head -n 1)
 
 version=${last_version#v}
