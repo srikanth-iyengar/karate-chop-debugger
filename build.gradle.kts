@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "in.srikanthk.devlabs"
-version = "2.3.0"
+version = "2.4.0"
 
 repositories {
     mavenCentral()
@@ -37,23 +37,24 @@ intellijPlatform {
 
         changeNotes = """
             <html>
-              <body>
-                <ul>
-                  <li>Ability to step over/into scenarios</li>
-                  <li>Add keymaps</li>
-                  <li><b>Run individual scenarios</b> directly from the editor with the Run icon.</li>
-                  <li><b>Seamless IntelliJ breakpoint integration</b> – no manual setup needed.</li>
-                  <li>Added <b>Step Into</b> support to move through tests step by step during debugging.</li>
-                  <li>Improved <b>syntax highlighting</b> and <b>newline handling</b> in Karate feature files.</li>
-                  <li>Removed outdated breakpoint panels for a <b>cleaner, simpler interface</b>.</li>
-                </ul>
-                <h3>Bug Fixes</h3>
-                <ul>
-                  <li>Resolved issues with parsing scenarios separated by blank lines.</li>
-                  <li>Improved syntax highlighting stability.</li>
-                  <li>Fixed rare crash when re-running tests.</li>
-                </ul>
-              </body>
+                <body>
+                    <ul>
+                        <li><b>Run individual scenarios</b> directly from the editor using the Run icon.</li>
+                        <li>Enhanced <b>syntax highlighting</b> and improved <b>newline handling</b> in Karate feature files.</li>
+                        <li>Introduced a <b>Step Back</b> feature for debugging.</li>
+                        <li>Added <b>Hot Reload</b> support for reloading the current line during a debugging session.</li>
+                        <li>Enabled the ability to <b>Step Over</b> and <b>Step Into</b> scenarios while debugging.</li>
+                        <li>Added keyboard shortcuts <b>F8</b> (Step Over) and <b>F7</b> (Step Into).</li>
+                        <li>Improved <b>Step Into</b> functionality for more precise test navigation during debugging.</li>
+                        <li>Seamless <b>IntelliJ breakpoint integration</b> – no manual configuration required.</li>
+                    </ul>
+                    <h3>Bug Fixes</h3>
+                    <ul>
+                        <li>Resolved issues with parsing scenarios separated by blank lines.</li>
+                        <li>Improved syntax highlighting stability and accuracy.</li>
+                        <li>Fixed a rare crash occurring when re-running tests.</li>
+                    </ul>
+                </body>
             </html>
         """.trimIndent()
     }
@@ -74,7 +75,7 @@ tasks {
         println("🔍 PRIVATE_KEY_PATH = $keyPath")
         println("🔍 PRIVATE_KEY_PASSWORD = ${if (certPassword != null) "***" else "NOT SET"}")
 
-        if(certPath != null && keyPath != null) {
+        if (certPath != null && keyPath != null) {
             val certFile = Paths.get(certPath)
             val keyFile = Paths.get(keyPath)
 
