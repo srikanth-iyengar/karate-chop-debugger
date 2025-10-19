@@ -48,3 +48,6 @@ bin/
 
 idea-flex.skeleton
 jflex-*.jar
+
+*.build
+*.bak

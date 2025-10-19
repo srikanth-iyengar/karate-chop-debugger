@@ -1,6 +1,3 @@
-import java.nio.file.Files
-import java.nio.file.Paths
-
 plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm") version "2.1.0"
@@ -66,27 +63,24 @@ tasks {
     }
 
     signPlugin {
-        val certPath = System.getenv("CERTIFICATE_CHAIN_PATH")
-        val keyPath = System.getenv("PRIVATE_KEY_PATH")
+        val certContent = System.getenv("CERTIFICATE_CHAIN")
+        val keyContent = System.getenv("PRIVATE_KEY")
         val certPassword = System.getenv("PRIVATE_KEY_PASSWORD")
 
-        println("🔐 Starting plugin signing process...")
-        println("🔍 CERTIFICATE_CHAIN_PATH = $certPath")
-        println("🔍 PRIVATE_KEY_PATH = $keyPath")
         println("🔍 PRIVATE_KEY_PASSWORD = ${if (certPassword != null) "***" else "NOT SET"}")
 
-        if (certPath != null && keyPath != null) {
-            val certFile = Paths.get(certPath)
-            val keyFile = Paths.get(keyPath)
-
-            val certContent = Files.readString(certFile).trim()
-            val keyContent = Files.readString(keyFile).trim()
-
+        if (certContent != null && keyContent != null) {
             println("✅ Certificate and key files loaded successfully.")
             certificateChain.set(certContent)
             privateKey.set(keyContent)
             password.set(certPassword)
         }
+    }
+
+    publishPlugin {
+        token = providers.environmentVariable("JETBRAINS_TOKEN")
+            .orElse(providers.systemProperty("JETBRAINS_TOKEN"))
+            .orElse("")
     }
 }
 
