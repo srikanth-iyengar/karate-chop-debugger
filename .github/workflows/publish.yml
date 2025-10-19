@@ -35,4 +35,4 @@ jobs:
           PRIVATE_KEY_PASSWORD: ${{ secrets.PRIVATE_KEY_PASSWORD }}
         run: ./gradlew publishPlugin
       - name: Push tag
-        run: ./tag-increment.sh
+        run: ./scripts/tag-increment.sh
