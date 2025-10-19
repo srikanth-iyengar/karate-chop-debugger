@@ -15,9 +15,11 @@ class KarateRunLineMarkerContributor : RunLineMarkerContributor() {
         val customAction = RunTestAction()
 
         if (isScenario(element)) {
-            val descriptions = element.nextSibling.text.trim().split(Regex("""(?:\r?\n)+"""))
-            if(descriptions.isNotEmpty()) {
-                customAction.scenarioName = "\"^${descriptions[0]}$\""
+            val descriptions = element.nextSibling?.text?.trim()?.split(Regex("""(?:\r?\n)+"""))
+            descriptions?.let {
+                if(it.isNotEmpty()) {
+                    customAction.scenarioName = it[0]
+                }
             }
         }
         return Info(
