@@ -7,7 +7,7 @@ on:
       - main
 
 jobs:
-  qodana:
+  publish_plugin:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -24,7 +24,7 @@ jobs:
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: '8.x'
+          gradle-version: '8.13'
       - name: Setup version info
         run: ./scripts/next-version.sh
       - name: Increment version
