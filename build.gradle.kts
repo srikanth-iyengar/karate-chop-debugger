@@ -42,7 +42,7 @@ intellijPlatform {
                         <li><b>Run individual scenarios</b> directly from the editor using the Run icon.</li>
                         <li>Enhanced <b>syntax highlighting</b> and improved <b>newline handling</b> in Karate feature files.</li>
                         <li>Introduced a <b>Step Back</b> feature for debugging.</li>
-                        <li>Added <b>Hot Reload</b> support for reloading the current line during a debugging session.</li>
+                        <li>Added <b>Hot Reload</b> support for reloading the current scenario during a debugging session.</li>
                         <li>Enabled the ability to <b>Step Over</b> and <b>Step Into</b> scenarios while debugging.</li>
                         <li>Added keyboard shortcuts <b>F8</b> (Step Over) and <b>F7</b> (Step Into).</li>
                         <li>Improved <b>Step Into</b> functionality for more precise test navigation during debugging.</li>
