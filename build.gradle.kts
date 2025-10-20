@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "in.srikanthk.devlabs"
-version = "2.4.2"
+version = "2.4.3"
 
 repositories {
     mavenCentral()
