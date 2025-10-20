@@ -31,10 +31,6 @@ https://github.com/user-attachments/assets/97a5d920-f316-404a-b05a-0900b020c046
 
 ## 🚀 Getting Started
 
-### Gotcha
-
-- 🔸 Breakpoints will only be visible in the gutter if the **Cucumber for Java** plugin is installed.
-
 ### Prerequisites
 
 - IntelliJ IDEA 2025.1+
