@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.karate.KarateException;
 import com.intuit.karate.RuntimeHook;
 import com.intuit.karate.Suite;
-import com.intuit.karate.core.Scenario;
-import com.intuit.karate.core.ScenarioRuntime;
-import com.intuit.karate.core.Step;
-import com.intuit.karate.core.Variable;
+import com.intuit.karate.core.*;
 import in.srikanthk.devlabs.kchopdebugger.agent.topic.DebugRequest;
 import in.srikanthk.devlabs.kchopdebugger.agent.topic.DebugResponse;
 import org.apache.commons.lang3.Strings;
@@ -90,8 +87,20 @@ public class DebugHook implements RuntimeHook {
                 @Override
                 public void evaluateExpression(String expression) {
                     try {
-                        var response = sr.engine.evalJs(expression);
-                        responsePublisher.evaluationResult(response.getAsString(), "");
+                        if(expression.startsWith("*")) {
+                            var tempStep = new Step(sr.scenario, -1);
+                            try {
+                                tempStep.parseAndUpdateFrom(expression);
+                            } catch (Exception e) {
+                                responsePublisher.evaluationResult("", e.getMessage());
+                            }
+                            var response = StepRuntime.execute(tempStep, sr.actions);
+                            var stepResult = new StepResult(tempStep, response);
+                            responsePublisher.evaluationResult(stepResult.getResult().getStatus(), "");
+                        } else {
+                            var response = sr.engine.evalJs(expression);
+                            responsePublisher.evaluationResult(response.getAsString(), "");
+                        }
                     } catch (KarateException exception) {
                         responsePublisher.evaluationResult("", exception.getMessage());
                     } finally {

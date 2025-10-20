@@ -22,7 +22,6 @@ dependencies {
         bundledPlugin("com.intellij.modules.json")
     }
 
-    implementation("com.intuit.karate:karate-junit5:1.4.1")
     implementation(project(":debug-agent"))
 }
 

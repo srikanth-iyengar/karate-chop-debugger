@@ -13,6 +13,7 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -107,7 +108,10 @@ public class DebugClient extends DebugServer {
 
             @Override
             public void evaluationResult(String result, String error) {
-                RemoteCall call = RemoteCall.builder().args(List.of(result, error)).methodName("evaluationResult").build();
+                List<Object> args = new ArrayList<>();
+                args.add(result);
+                args.add(error);
+                RemoteCall call = RemoteCall.builder().args(args).methodName("evaluationResult").build();
                 try {
                     stream.writeObject(call);
                 } catch (IOException e) {
