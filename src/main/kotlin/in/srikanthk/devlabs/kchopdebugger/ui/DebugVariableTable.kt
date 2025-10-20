@@ -38,7 +38,7 @@ class DebugVariableTable(private val project: Project) : JPanel(BorderLayout()) 
 
     // --- Expression Field with Dynamic Icon ---
     private val expressionField = JBTextField().apply {
-        emptyText.text = "Prefix with * for Karate expression; without * for Karate JS"
+        emptyText.text = "Evaluate Expression (* for Karate, default is JS)"
     }
     private val iconLabel = JLabel(AllIcons.FileTypes.JavaScript).apply {
         border = BorderFactory.createEmptyBorder(0, 4, 0, 4)
