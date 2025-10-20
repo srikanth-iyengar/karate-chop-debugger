@@ -1,0 +1,28 @@
+name: Create github release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            # Release Notes
+            Karate Chop Debugger ${{ github.ref }} release
+            This is a new release based on tag ${{ github.ref }}.
+          draft: false
+          prerelease: false
