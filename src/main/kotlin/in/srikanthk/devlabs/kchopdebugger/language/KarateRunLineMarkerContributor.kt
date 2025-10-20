@@ -18,7 +18,7 @@ class KarateRunLineMarkerContributor : RunLineMarkerContributor() {
             val descriptions = element.nextSibling?.text?.trim()?.split(Regex("""(?:\r?\n)+"""))
             descriptions?.let {
                 if(it.isNotEmpty()) {
-                    customAction.scenarioName = it[0]
+                    customAction.scenarioName = "\"^${it[0]}$\""
                 }
             }
         }

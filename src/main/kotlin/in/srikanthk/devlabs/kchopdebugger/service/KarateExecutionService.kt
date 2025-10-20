@@ -285,7 +285,7 @@ class KarateExecutionService(val project: Project) {
                 result: String,
                 error: String
             ) {
-                responsePublisher.evaluateExpressionResult(result, error)
+                responsePublisher.evaluateExpressionResult(result ?: "", error ?: "")
             }
         }
     }
