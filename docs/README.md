@@ -19,3 +19,47 @@ The plugin integrates with IntelliJ's debugging UI to provide a seamless experie
 *   **Expression Evaluation:** The evaluation field allows you to run Karate expressions or JavaScript code in the current context. Prefix your expression with `*` to run a Karate expression; otherwise, it will be treated as JavaScript.
 *   **Step-Through Execution:** Use the standard "Step Over" and "Resume" buttons to control the execution flow.
 *   **Syntax Highlighting:** The plugin provides custom syntax highlighting for `.feature` files to improve readability.
+
+---
+
+## Presentation (Marp/Marpit)
+
+The deck lives at `docs/presentation.md` and is compatible with Marp (marp-cli).
+
+Build to HTML or PDF:
+
+```bash
+# Install marp-cli (Node.js)
+npm i -g @marp-team/marp-cli
+
+# HTML
+marp docs/presentation.md -o docs/presentation.html
+
+# PDF (requires Chrome / Chromium available in PATH)
+marp docs/presentation.md -o docs/presentation.pdf
+```
+
+Live preview while editing:
+
+```bash
+marp -w docs/presentation.md -o docs/presentation.html
+```
+
+Tips:
+- If fonts or emojis render oddly in PDF, try `--allow-local-files` and ensure Chromium is installed.
+- You can also use the Marp VS Code extension for a live preview.
+
+### Custom theme
+
+A Monokai theme is provided at `docs/theme.css`. Use it with marp-cli:
+
+```bash
+# HTML with theme
+marp --theme-set docs/theme.css --theme monokai docs/presentation.md -o docs/presentation.html
+
+# PDF with theme
+marp --theme-set docs/theme.css --theme monokai docs/presentation.md -o docs/presentation.pdf
+
+# Watch mode with theme
+marp -w --theme-set docs/theme.css --theme monokai docs/presentation.md -o docs/presentation.html
+```
