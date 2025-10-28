@@ -38,6 +38,19 @@ class KarateStepAnnotator : Annotator {
         "header"
     )
 
+    private val defTypes = setOf(
+        "def",
+        "json",
+        "xml",
+        "boolean",
+        "request",
+        "string",
+        "method",
+        "driver",
+        "url",
+        "path",
+    )
+
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         if (element !is KarateStep) return
 
@@ -50,7 +63,7 @@ class KarateStepAnnotator : Annotator {
             KarateTypes.STAR_STEP -> highlight(
                 holder,
                 firstPsi.textRange,
-                DefaultLanguageHighlighterColors.INSTANCE_METHOD
+                DefaultLanguageHighlighterColors.DOC_COMMENT_TAG
             )
 
             KarateTypes.GIVEN_STEP,
@@ -70,10 +83,16 @@ class KarateStepAnnotator : Annotator {
 
                     if (child.elementType.toString() == "WORD" && index == 0) {
                         if (text in karateTypes) {
-                            highlight(holder, secondPsi.textRange, DefaultLanguageHighlighterColors.INSTANCE_FIELD)
+                            highlight(holder, secondPsi.textRange, DefaultLanguageHighlighterColors.STATIC_FIELD)
                         }
                         return@forEachIndexed
                     }
+
+                    if(child.elementType.toString() == "WORD" && index == 1 && defTypes.contains(list[0].text.trim())) {
+                        highlight(holder, secondPsi.textRange, DefaultLanguageHighlighterColors.STATIC_METHOD)
+                        return@forEachIndexed
+                    }
+
                     if (text.toDoubleOrNull() != null) {
                         highlight(holder, secondPsi.textRange, DefaultLanguageHighlighterColors.NUMBER)
                     } else if (
