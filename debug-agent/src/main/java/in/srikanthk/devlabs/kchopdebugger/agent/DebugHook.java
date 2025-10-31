@@ -12,6 +12,7 @@ import org.apache.commons.lang3.Strings;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -24,6 +25,8 @@ public class DebugHook implements RuntimeHook {
     private final SessionState sessionState = SessionState.getInstance();
     private Scenario stepOverScenario;
     private boolean doingStepOver = false;
+    private boolean doingStepOut = false;
+    private Optional<Scenario> stepOutScenario = Optional.empty();
 
     private static final String JAVA_BASE_PATH = "src/test/java";
     private static final String CLASSPATH_COLON = "classpath:";
@@ -35,8 +38,8 @@ public class DebugHook implements RuntimeHook {
 
     @Override
     public boolean beforeStep(Step step, ScenarioRuntime sr) {
-        if(doingStepOver) {
-            if(sr.scenario == stepOverScenario) {
+        if (doingStepOver) {
+            if (sr.scenario == stepOverScenario) {
                 stopOnNextStep.set(true);
                 stepOverScenario = null;
                 doingStepOver = false;
@@ -60,7 +63,7 @@ public class DebugHook implements RuntimeHook {
                 ) != null && lineSet.floor(endLine) >= startLine);
         AtomicBoolean stepBack = new AtomicBoolean(false);
 
-        if (shouldHalt || stopOnNextStep.get()) {
+        if ((shouldHalt || stopOnNextStep.get()) && !sessionState.isSkipBreakpoints()) {
             responsePublisher.navigateTo(filePath, startLine);
             responsePublisher.updateState(DebuggerState.Halted);
             publishKarateVariablesSerializabel(sr.engine.vars);
@@ -87,7 +90,7 @@ public class DebugHook implements RuntimeHook {
                 @Override
                 public void evaluateExpression(String expression) {
                     try {
-                        if(expression.startsWith("*")) {
+                        if (expression.startsWith("*")) {
                             var tempStep = new Step(sr.scenario, -1);
                             try {
                                 tempStep.parseAndUpdateFrom(expression);
@@ -129,6 +132,18 @@ public class DebugHook implements RuntimeHook {
                     sr.hotReload();
                     publishKarateVariablesSerializabel(sr.engine.vars);
                 }
+
+                @Override
+                public void setShouldSkipBreakpoints(boolean skipBreakpoints) {
+                    SessionState.getInstance().setSkipBreakpoints(skipBreakpoints);
+                }
+
+                @Override
+                public void stepOut() {
+                    doingStepOut = true;
+                    stepOutScenario = Optional.of(sr.scenario);
+                    latch.countDown();
+                }
             };
             messageBus.subscribe(DebugRequest.TOPIC, listener);
 
@@ -141,7 +156,7 @@ public class DebugHook implements RuntimeHook {
             messageBus.unsubscribe(DebugRequest.TOPIC, listener);
         }
 
-        if(stepBack.get()) {
+        if (stepBack.get()) {
             return false;
         }
 
@@ -167,8 +182,13 @@ public class DebugHook implements RuntimeHook {
 
     @Override
     public void afterScenario(ScenarioRuntime sr) {
-        if(doingStepOver) {
+        if (doingStepOver) {
             doingStepOver = false;
+            this.stopOnNextStep.set(true);
+        }
+        if (doingStepOut && stepOutScenario.isPresent() && sr.scenario == stepOutScenario.get()) {
+            doingStepOut = false;
+            stepOutScenario = Optional.empty();
             this.stopOnNextStep.set(true);
         }
         RuntimeHook.super.afterScenario(sr);

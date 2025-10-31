@@ -3,10 +3,7 @@ package `in`.srikanthk.devlabs.kchopdebugger.ui
 import com.intellij.icons.AllIcons
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
-import com.intellij.openapi.actionSystem.ActionManager
-import com.intellij.openapi.actionSystem.AnAction
-import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.markup.HighlighterLayer
@@ -24,7 +21,6 @@ import `in`.srikanthk.devlabs.kchopdebugger.service.KarateExecutionService
 import `in`.srikanthk.devlabs.kchopdebugger.topic.DebuggerInfoRequestTopic
 import `in`.srikanthk.devlabs.kchopdebugger.topic.DebuggerInfoResponseTopic
 import java.awt.BorderLayout
-import java.util.HashMap
 import javax.swing.JPanel
 
 class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) {
@@ -47,6 +43,10 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
         override fun update(e: AnActionEvent) {
             e.presentation.isEnabled = state == DebuggerState.Halted
         }
+
+        override fun getActionUpdateThread(): ActionUpdateThread {
+            return ActionUpdateThread.BGT
+        }
     }
 
     private val stepIntoAction = object : AnAction("Step Into", "Step into", AllIcons.Actions.TraceInto) {
@@ -57,14 +57,23 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
         override fun update(e: AnActionEvent) {
             e.presentation.isEnabled = state == DebuggerState.Halted
         }
+
+        override fun getActionUpdateThread(): ActionUpdateThread {
+            return ActionUpdateThread.BGT
+        }
     }
 
     private val stepOverAction = object : AnAction("Step Over", "Step over", AllIcons.Actions.TraceOver) {
         override fun actionPerformed(e: AnActionEvent) {
             publisher?.stepOver()
         }
+
         override fun update(e: AnActionEvent) {
             e.presentation.isEnabled = state == DebuggerState.Halted
+        }
+
+        override fun getActionUpdateThread(): ActionUpdateThread {
+            return ActionUpdateThread.BGT
         }
     }
 
@@ -76,6 +85,10 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
         override fun update(e: AnActionEvent) {
             e.presentation.isEnabled = state != DebuggerState.Finished
         }
+
+        override fun getActionUpdateThread(): ActionUpdateThread {
+            return ActionUpdateThread.BGT
+        }
     }
 
     private val rerunAction = object : AnAction("Rerun", "Rerun execution", AllIcons.Actions.RestartDebugger) {
@@ -86,9 +99,13 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
         override fun update(e: AnActionEvent) {
             e.presentation.isEnabled = state == DebuggerState.Finished
         }
+
+        override fun getActionUpdateThread(): ActionUpdateThread {
+            return ActionUpdateThread.BGT
+        }
     }
 
-    private val stepBackAction = object: AnAction("Step Back", "Step back", AllIcons.Actions.Back) {
+    private val stepBackAction = object : AnAction("Step Back", "Step back", AllIcons.Actions.Back) {
         override fun actionPerformed(e: AnActionEvent) {
             publisher?.stepBack()
         }
@@ -96,11 +113,50 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
         override fun update(e: AnActionEvent) {
             e.presentation.isEnabled = state == DebuggerState.Halted
         }
+
+        override fun getActionUpdateThread(): ActionUpdateThread {
+            return ActionUpdateThread.BGT
+        }
     }
 
-    private val hotReload = object: AnAction("Hot Reload Scenario", "Hot reloads current scenario in execution", AllIcons.Actions.BuildLoadChanges) {
+    private val stepOutAction = object : AnAction("Step Out", "Step out", AllIcons.Actions.StepOut) {
         override fun actionPerformed(e: AnActionEvent) {
-            karateExecutionService.hotReload() {
+            publisher?.stepOut()
+        }
+
+        override fun update(e: AnActionEvent) {
+            e.presentation.isEnabled = state == DebuggerState.Halted
+        }
+
+        override fun getActionUpdateThread(): ActionUpdateThread {
+            return ActionUpdateThread.BGT
+        }
+    }
+
+    private val toggleSkipBreakpointAction =
+        object : ToggleAction("Mute Breakpoints", "Mute breakpoints", AllIcons.Debugger.MuteBreakpoints) {
+            var skipBreakpoints = false
+            override fun isSelected(p0: AnActionEvent): Boolean {
+                return skipBreakpoints
+            }
+
+            override fun setSelected(p0: AnActionEvent, p1: Boolean) {
+                skipBreakpoints = p1
+                publisher?.setShouldSkipBreakpoints(skipBreakpoints)
+            }
+
+            override fun getActionUpdateThread(): ActionUpdateThread {
+                return ActionUpdateThread.BGT
+            }
+        }
+
+    private val hotReload = object : AnAction(
+        "Hot Reload Scenario",
+        "Hot reloads current scenario in execution",
+        AllIcons.Actions.BuildLoadChanges
+    ) {
+        override fun actionPerformed(e: AnActionEvent) {
+            karateExecutionService.hotReload {
                 publisher?.hotReload()
                 WriteCommandAction.runWriteCommandAction(project) {
                     ToolWindowManager.getInstance(project).getToolWindow("Karate Chop Debugger")?.show()
@@ -118,10 +174,18 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
         override fun update(e: AnActionEvent) {
             e.presentation.isEnabled = state == DebuggerState.Halted
         }
+
+        override fun getActionUpdateThread(): ActionUpdateThread {
+            return ActionUpdateThread.BGT
+        }
     }
 
     init {
-        val actionGroup = DefaultActionGroup(rerunAction, resumeAction, stepOverAction, stepIntoAction, stepBackAction, hotReload, stopAction)
+        val actionGroup = DefaultActionGroup(
+            rerunAction, stopAction, hotReload, Separator.create(),
+            resumeAction, stepIntoAction, stepOverAction, stepBackAction, stepOutAction, Separator.create(),
+            toggleSkipBreakpointAction
+        )
         val actionToolbar = ActionManager.getInstance().createActionToolbar(
             "KarateDebuggerToolbar", actionGroup, false
         ).apply {
@@ -136,7 +200,7 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
         tabbedPane.apply {
             addTab("Variables", debugVarsPanel)
             addTab("Logs", logViewPanel)
-            addTab("Run Properties", karatePropertiesPanel)
+            addTab("VM options", karatePropertiesPanel)
         }
 
         val centerPanel = JPanel(BorderLayout()).apply {
@@ -147,7 +211,6 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
         add(centerPanel, BorderLayout.CENTER)
 
         project.messageBus.connect().subscribe(DebuggerInfoResponseTopic.TOPIC, object : DebuggerInfoResponseTopic {
-            override fun updateKarateVariables(vars: HashMap<String, Map<String, Object>>) {}
             override fun updateState(state: DebuggerState) {
                 WriteCommandAction.runWriteCommandAction(project) {
                     updateDebuggerState(state)
@@ -159,11 +222,6 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
                     focusTo(filepath, lineNumber)
                 }
             }
-
-            override fun evaluateExpressionResult(result: String, error: String) {
-            }
-
-            override fun appendLog(log: String, isSuccess: Boolean) {}
         })
     }
 
@@ -171,7 +229,7 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
         state = newState
 
         if (state == DebuggerState.Finished) {
-            karateExecutionService.lastExecutedFileName?.let  {
+            karateExecutionService.lastExecutedFileName?.let {
                 cleanupMarkups(it)
             }
         }
@@ -195,9 +253,7 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
     private fun focusTo(filePath: String, lineNumber: Int) {
         val editor = FileEditorManager.getInstance(project).selectedTextEditor
         editor?.let {
-            editor.virtualFile?.let { file ->
-                cleanupMarkups(file.path)
-            }
+            editor.virtualFile?.let { file -> cleanupMarkups(file.path) }
         }
         val virtualFile = LocalFileSystem.getInstance().findFileByPath(filePath)
 
@@ -208,7 +264,6 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
 
             val startOffset = editor.document.getLineStartOffset(lineNumber - 1)
             val endOffset = editor.document.getLineEndOffset(lineNumber - 1)
-
             val attributes =
                 EditorColorsManager.getInstance().globalScheme.getAttributes(DebuggerColors.EXECUTIONPOINT_ATTRIBUTES)
 
@@ -220,15 +275,13 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
                 attributes,
                 HighlighterTargetArea.LINES_IN_RANGE
             )
-
             descriptor.navigate(true)
         } else {
-            notificationGroup
-                .createNotification(
-                    "External file detected",
-                    "The debugger stepped into a source file located outside the current project.",
-                    NotificationType.ERROR
-                ).notify(project)
+            notificationGroup.createNotification(
+                "External file detected",
+                "The debugger stepped into a source file located outside the current project.",
+                NotificationType.ERROR
+            ).notify(project)
         }
     }
 }

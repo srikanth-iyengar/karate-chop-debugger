@@ -17,6 +17,7 @@ public class SessionState {
     private Map<String, TreeSet<Integer>> breakpoints = new ConcurrentHashMap<>();
     private String projectPath;
     private String featureClassPath;
+    private boolean skipBreakpoints = false;
 
     // singleton
     private SessionState() {

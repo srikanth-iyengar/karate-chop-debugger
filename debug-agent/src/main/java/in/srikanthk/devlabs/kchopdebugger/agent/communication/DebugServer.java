@@ -132,6 +132,15 @@ public class DebugServer {
             public void hotReload() {
                 sendCall("hotReload");
             }
+
+            @Override
+            public void setShouldSkipBreakpoints(boolean skipBreakpoints) {
+                sendCall("setShouldSkipBreakpoints", skipBreakpoints);
+            }
+
+            public void stepOut() {
+                sendCall("stepOut");
+            }
         };
 
         DebugMessageBus.getInstance().subscribe(DebugRequest.TOPIC, requestForwarder);

@@ -5,15 +5,20 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.actionSystem.DataKey
 import com.intellij.psi.PsiDocumentManager
+import com.intuit.karate.junit5.Karate
 import `in`.srikanthk.devlabs.kchopdebugger.language.KarateLanguage
 import `in`.srikanthk.devlabs.kchopdebugger.service.KarateExecutionService
 import java.util.concurrent.CompletableFuture
 
-open class RunTestAction: AnAction() {
+open class DebugTestAction : AnAction() {
+    companion object {
+        val KARATE_SCENARIO_NAME: DataKey<String> =
+            DataKey.create("KARATE_SCENARIO_NAME")
+    }
 
     override fun actionPerformed(action: AnActionEvent) {
         val project = action.project ?: return
-        val scenarioName = action.getData(DebugTestAction.KARATE_SCENARIO_NAME)
+        val scenarioName = action.getData(KARATE_SCENARIO_NAME)
 
         val file = action.getData(CommonDataKeys.VIRTUAL_FILE);
 
@@ -22,7 +27,7 @@ open class RunTestAction: AnAction() {
         }
 
         val executionService = project.getService(KarateExecutionService::class.java);
-        CompletableFuture.supplyAsync { executionService.executeSuite(file.path, scenarioName, true) }
+        CompletableFuture.supplyAsync { executionService.executeSuite(file.path, scenarioName) }
     }
 
     override fun update(action: AnActionEvent) {

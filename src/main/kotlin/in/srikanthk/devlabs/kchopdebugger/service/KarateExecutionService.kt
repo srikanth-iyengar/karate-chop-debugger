@@ -24,7 +24,9 @@ import `in`.srikanthk.devlabs.kchopdebugger.topic.DebuggerInfoResponseTopic
 import org.jetbrains.idea.maven.execution.MavenRunner
 import org.jetbrains.idea.maven.execution.MavenRunnerParameters
 import org.jetbrains.idea.maven.project.MavenProjectsManager
-import java.io.*
+import java.io.BufferedReader
+import java.io.File
+import java.io.InputStreamReader
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
@@ -56,7 +58,7 @@ class KarateExecutionService(val project: Project) {
         return breakpoints
     }
 
-    fun executeSuite(fileName: String, scenarioName: String?) {
+    fun executeSuite(fileName: String, scenarioName: String?, skipBreakpoints: Boolean = false) {
         if(this.process != null) {
             notificationGroup
                 .createNotification(
@@ -130,6 +132,14 @@ class KarateExecutionService(val project: Project) {
                     override fun hotReload() {
                         remotePublisher.hotReload()
                     }
+
+                    override fun setShouldSkipBreakpoints(skipBreakpoints: Boolean) {
+                        remotePublisher.setShouldSkipBreakpoints(skipBreakpoints)
+                    }
+
+                    override fun stepOut() {
+                        remotePublisher.stepOut()
+                    }
                 })
 
                 val debugServer = DebugServer.getInstance().start()
@@ -141,7 +151,7 @@ class KarateExecutionService(val project: Project) {
                     append("-Ddebug.port=${debugServer.port}")
                 }.trim()
 
-                val options = "$vmOptions -jar ${getAgentJarFile().path} $featureClasspath ${project.basePath} $breakpointPath $urls ${scenarioName ?: ""}"
+                val options = "$vmOptions -jar ${getAgentJarFile().path} $featureClasspath ${project.basePath} $breakpointPath $urls $skipBreakpoints ${scenarioName ?: ""}"
                 val argumentPath = Files.createTempFile("argument", ".txt")
                 Files.writeString(
                     argumentPath,
@@ -236,7 +246,7 @@ class KarateExecutionService(val project: Project) {
         return true
     }
 
-    public fun hotReload(callback: Runnable) {
+    fun hotReload(callback: Runnable) {
         buildMavenProject(callback)
     }
 
