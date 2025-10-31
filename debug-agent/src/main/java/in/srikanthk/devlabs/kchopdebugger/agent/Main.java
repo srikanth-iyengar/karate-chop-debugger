@@ -29,7 +29,7 @@ public class Main {
     private static final DebugResponse responsePublisher = DebugMessageBus.getInstance().publisher(DebugResponse.TOPIC);
 
     public static void main(String[] args) {
-        if (args.length < 4) {
+        if (args.length < 5) {
             logger.error("Expected arguments: <featureClassPath> <projectBasePath> <breakpointsJson> <classpathUrls>");
             System.exit(1);
         }
@@ -37,13 +37,14 @@ public class Main {
         final String projectBasePath = args[1];
         final String breakpointsJson = args[2];
         final String classpathUrls = args[3];
+        final boolean skipBreakpoints = Boolean.parseBoolean(args[4]);
 
         try {
             List<URL> jars = parseClasspathUrls(classpathUrls);
             logger.info("Loading classpath JARs: {}", jars);
 
             ClassLoader customLoader = createClassLoader(jars);
-            initializeSessionState(featureClassPath, projectBasePath, breakpointsJson);
+            initializeSessionState(featureClassPath, projectBasePath, breakpointsJson, skipBreakpoints);
 
             logger.info("Debug port: {}", System.getProperty("debug.port"));
             DebugClient client = new DebugClient("localhost", NumberUtils.toInt(System.getProperty("debug.port")));
@@ -64,8 +65,8 @@ public class Main {
             var th = new Thread(() -> {
                 try {
                     String scenarioPatten = null;
-                    if (args.length > 4) {
-                        scenarioPatten = args[4];
+                    if (args.length > 5) {
+                        scenarioPatten = args[5];
                     }
                     executeSuite(customLoader, Optional.ofNullable(scenarioPatten));
                 } catch (Exception e) {
@@ -98,9 +99,10 @@ public class Main {
                 .collect(Collectors.toList());
     }
 
-    private static void initializeSessionState(String featurePath, String basePath, String breakpointPath) throws IOException {
+    private static void initializeSessionState(String featurePath, String basePath, String breakpointPath, boolean skipBreakpoints) throws IOException {
         sessionState.setFeatureClassPath(featurePath);
         sessionState.setProjectPath(basePath);
+        sessionState.setSkipBreakpoints(skipBreakpoints);
 
         String json = Files.readString(Path.of(breakpointPath), StandardCharsets.UTF_8);
 

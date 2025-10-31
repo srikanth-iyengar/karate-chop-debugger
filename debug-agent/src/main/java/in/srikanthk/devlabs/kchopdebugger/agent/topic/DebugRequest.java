@@ -14,4 +14,6 @@ public interface DebugRequest {
     default void stepOver() { }
     default void stepBack() { }
     default void hotReload() { }
+    default void setShouldSkipBreakpoints(boolean skipBreakpoints) { }
+    default void stepOut() { }
 }

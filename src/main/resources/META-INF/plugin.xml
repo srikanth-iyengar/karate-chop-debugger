@@ -32,7 +32,7 @@
         <toolWindow factoryClass="in.srikanthk.devlabs.kchopdebugger.ui.DebugToolWindowFactory"
                     id="Karate Chop Debugger" secondary="true" anchor="bottom"
                     icon="AllIcons.Toolwindows.ToolWindowInspection"/>
-        <runLineMarkerContributor language="karate-dsl"
+        <codeInsight.lineMarkerProvider language="karate-dsl"
                                   implementationClass="in.srikanthk.devlabs.kchopdebugger.language.KarateRunLineMarkerContributor"
                                   />
         <applicationService
@@ -71,10 +71,15 @@
     </projectListeners>
 
     <actions>
-        <action id="in.srikanthk.devlabs.kchopdebugger.action.RunTestAction"
-                class="in.srikanthk.devlabs.kchopdebugger.action.RunTestAction" text="Debug Test">
+        <action id="in.srikanthk.devlabs.kchopdebugger.action.DebugTestAction"
+                class="in.srikanthk.devlabs.kchopdebugger.action.DebugTestAction" text="Debug Test" icon="AllIcons.Actions.StartDebugger">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <keyboard-shortcut first-keystroke="shift F9" keymap="$default" />
+        </action>
+        <action id="in.srikanthk.devlabs.kchopdebugger.action.RunTestAction"
+                class="in.srikanthk.devlabs.kchopdebugger.action.RunTestAction" text="Run Test" icon="AllIcons.Actions.Execute">
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+            <keyboard-shortcut first-keystroke="shift F10" keymap="$default" />
         </action>
         <action id="in.srikanthk.devlabs.kchopdebugger.action.StepIntoAction"
                 class="in.srikanthk.devlabs.kchopdebugger.action.StepIntoAction" text="Step Into">
@@ -82,7 +87,7 @@
             <keyboard-shortcut first-keystroke="F7" keymap="$default" />
         </action>
         <action id="in.srikanthk.devlabs.kchopdebugger.action.StepOverAction"
-                class="in.srikanthk.devlabs.kchopdebugger.action.StepOverAction" text="Step Over">
+                class="in.srikanthk.devlabs.kchopdebugger.action.StepOverAction" text="Step Over" icon="AllIcons.Actions.StartDebugger">
             <add-to-group group-id="EditorPopupMenu" anchor="last" />
             <keyboard-shortcut first-keystroke="F8" keymap="$default" />
         </action>
