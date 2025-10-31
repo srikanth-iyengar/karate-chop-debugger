@@ -183,13 +183,13 @@ class ChopDebuggerWindow(private val project: Project) : JPanel(BorderLayout()) 
     init {
         val actionGroup = DefaultActionGroup(
             rerunAction, stopAction, hotReload, Separator.create(),
-            resumeAction, stepIntoAction, stepOverAction, stepBackAction, stepOutAction, Separator.create(),
+            resumeAction, stepOverAction, stepIntoAction, stepOutAction, stepBackAction, Separator.create(),
             toggleSkipBreakpointAction
         )
         val actionToolbar = ActionManager.getInstance().createActionToolbar(
             "KarateDebuggerToolbar", actionGroup, false
         ).apply {
-            setTargetComponent(this@ChopDebuggerWindow)
+            targetComponent = this@ChopDebuggerWindow
         }
 
         val toolbarPanel = JPanel(BorderLayout()).apply {

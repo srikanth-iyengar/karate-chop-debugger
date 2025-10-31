@@ -183,10 +183,12 @@ public class DebugHook implements RuntimeHook {
     @Override
     public void afterScenario(ScenarioRuntime sr) {
         if (doingStepOver) {
-            doingStepOver = false;
-            this.stopOnNextStep.set(true);
-        }
-        if (doingStepOut && stepOutScenario.isPresent() && sr.scenario == stepOutScenario.get()) {
+            if(sr.scenario == stepOverScenario) {
+                doingStepOver = false;
+                stepOverScenario = null;
+                this.stopOnNextStep.set(true);
+            }
+        } else if (doingStepOut && stepOutScenario.isPresent() && sr.scenario == stepOutScenario.get()) {
             doingStepOut = false;
             stepOutScenario = Optional.empty();
             this.stopOnNextStep.set(true);
