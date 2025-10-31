@@ -16,6 +16,6 @@ interface DebuggerInfoRequestTopic {
     fun stepOver() { }
     fun stepBack() { }
     fun hotReload() { }
-    fun setShouldSkipBreakpoints(skipBreakpoints: Boolean)
+    fun setShouldSkipBreakpoints(skipBreakpoints: Boolean) { }
     fun stepOut() { }
 }
