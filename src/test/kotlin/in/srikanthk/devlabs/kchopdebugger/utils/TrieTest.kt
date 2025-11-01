@@ -1,91 +1,90 @@
 package `in`.srikanthk.devlabs.kchopdebugger.utils
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import org.junit.jupiter.api.Assertions.*
 
 class TrieTest : BasePlatformTestCase() {
+    private lateinit var stringTrie: Trie<String>
+    private lateinit var intTrie: Trie<Int>
+    private lateinit var dataClassTrie: Trie<WordData>
 
-    private lateinit var trie: Trie
+    data class WordData(val word: String, val frequency: Int)
 
     override fun setUp() {
         super.setUp()
-        trie = Trie()
+        stringTrie = Trie()
+        intTrie = Trie()
+        dataClassTrie = Trie()
     }
 
-    fun `test search suggestions with common prefix`() {
-        trie.addWord("apple")
-        trie.addWord("apply")
-        trie.addWord("apricot")
+    fun testAddAndSearchWithStringData() {
+        stringTrie.addWord("apple", "A fruit")
+        stringTrie.addWord("application", "A program")
 
-        val suggestions = trie.searchWord("ap", "")
-        assertEquals(3, suggestions.size)
-        assertTrue(suggestions.containsAll(listOf("apple", "apply", "apricot")))
+        val results = stringTrie.searchWord("app", "")
+        val data = results.map { it.data }
+        assertEquals(2, data.size)
+        assertEquals(setOf("A fruit", "A program"), data.toSet())
     }
 
-    fun `test search suggestions with full word match`() {
-        trie.addWord("apple")
-        trie.addWord("applepie")
+    fun testAddAndSearchWithIntegerData() {
+        intTrie.addWord("one", 1)
+        intTrie.addWord("two", 2)
+        intTrie.addWord("ten", 10)
 
-        val suggestions = trie.searchWord("apple", "")
-        assertEquals(2, suggestions.size)
-        assertTrue(suggestions.containsAll(listOf("apple", "applepie")))
+        val results = intTrie.searchWord("t", "")
+        val data = results.map { it.data }
+        assertEquals(2, data.size)
+        assertEquals(setOf(2, 10), data.toSet())
     }
 
-    fun `test search with no matching words`() {
-        trie.addWord("apple")
-        val suggestions = trie.searchWord("b", "")
-        assertTrue(suggestions.isEmpty())
+    fun testAddAndSearchWithCustomDataClass() {
+        val appleData = WordData("apple", 10)
+        val applyData = WordData("apply", 5)
+        dataClassTrie.addWord("apple", appleData)
+        dataClassTrie.addWord("apply", applyData)
+
+        val results = dataClassTrie.searchWord("appl", "")
+        val data = results.map { it.data }
+        assertEquals(2, data.size)
+        assertEquals(setOf(appleData, applyData), data.toSet())
     }
 
-    fun `test search in an empty trie`() {
-        val suggestions = trie.searchWord("a", "")
-        assertTrue(suggestions.isEmpty())
+    fun testSearchWithNoMatchingPrefix() {
+        stringTrie.addWord("apple", "A fruit")
+        val results = stringTrie.searchWord("b", "")
+        assertTrue(results.isEmpty())
     }
 
-    fun `test insert and search for single-letter words`() {
-        trie.addWord("a")
-        trie.addWord("b")
-
-        val suggestionsA = trie.searchWord("a", "")
-        assertEquals(1, suggestionsA.size)
-        assertTrue(suggestionsA.contains("a"))
-
-        val suggestionsB = trie.searchWord("b", "")
-        assertEquals(1, suggestionsB.size)
-        assertTrue(suggestionsB.contains("b"))
+    fun testSearchInEmptyTrie() {
+        val results = stringTrie.searchWord("a", "")
+        assertTrue(results.isEmpty())
     }
 
-    fun `test insert duplicate words`() {
-        trie.addWord("apple")
-        trie.addWord("apple")
+    fun testOverwriteDataForDuplicateWord() {
+        stringTrie.addWord("apple", "Original data")
+        stringTrie.addWord("apple", "Updated data")
 
-        val suggestions = trie.searchWord("a", "")
-        assertEquals(1, suggestions.size)
-        assertTrue(suggestions.contains("apple"))
+        val results = stringTrie.searchWord("apple", "")
+        val data = results.map { it.data }
+        assertEquals(1, data.size)
+        assertEquals("Updated data", data.first())
     }
 
-    fun `test search with prefix that is a full word`() {
-        trie.addWord("apple")
-        trie.addWord("applepie")
+    fun testSearchWithEmptyPrefixReturnsAllData() {
+        stringTrie.addWord("one", "1")
+        stringTrie.addWord("two", "2")
 
-        val suggestions = trie.searchWord("apple", "")
-        assertEquals(2, suggestions.size)
-        assertTrue(suggestions.containsAll(listOf("apple", "applepie")))
+        val results = stringTrie.searchWord("", "")
+        val data = results.map { it.data }
+        assertEquals(2, data.size)
+        assertEquals(setOf("1", "2"), data.toSet())
     }
 
-    fun `test search for empty string prefix`() {
-        trie.addWord("apple")
-        trie.addWord("banana")
-
-        val suggestions = trie.searchWord("", "")
-        assertEquals(2, suggestions.size)
-        assertTrue(suggestions.containsAll(listOf("apple", "banana")))
-    }
-
-    fun `test insert empty string`() {
-        trie.addWord("")
-        val suggestions = trie.searchWord("", "")
-        assertEquals(1, suggestions.size)
-        assertTrue(suggestions.contains(""))
+    fun testAddEmptyWord() {
+        stringTrie.addWord("", "Empty word data")
+        val results = stringTrie.searchWord("", "")
+        val data = results.map { it.data }
+        assertEquals(1, data.size)
+        assertEquals("Empty word data", data.first())
     }
 }

@@ -1,6 +1,6 @@
 # 🥋 Karate Chop Debugger
-# 🥋 Karate Chop Debugger
 ![Build](https://github.com/srikanth-iyengar/karate-chop-debugger/actions/workflows/publish.yml/badge.svg)
+![Build](https://github.com/srikanth-iyengar/karate-chop-debugger/actions/workflows/check-plugin.yml/badge.svg)
 ![JetBrains Plugin Version](https://img.shields.io/jetbrains/plugin/v/28671)
 ![JetBrains Plugin Downloads](https://img.shields.io/jetbrains/plugin/d/28671)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
