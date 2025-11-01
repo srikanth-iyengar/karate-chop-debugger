@@ -23,6 +23,7 @@ dependencies {
     }
 
     implementation(project(":debug-agent"))
+    testImplementation("junit:junit:4.13.2")
 }
 
 intellijPlatform {

@@ -1,6 +1,17 @@
 # 🥋 Karate Chop Debugger
+![Build](https://github.com/srikanth-iyengar/karate-chop-debugger/actions/workflows/publish.yml/badge.svg)
+![Build](https://github.com/srikanth-iyengar/karate-chop-debugger/actions/workflows/check-plugin.yml/badge.svg)
+![JetBrains Plugin Version](https://img.shields.io/jetbrains/plugin/v/28671)
+![JetBrains Plugin Downloads](https://img.shields.io/jetbrains/plugin/d/28671)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/srikanth-iyengar/karate-chop-debugger/issues)
+[![GitHub issues](https://img.shields.io/github/issues/srikanth-iyengar/karate-chop-debugger.svg)](https://github.com/srikanth-iyengar/karate-chop-debugger/issues)
+[![GitHub stars](https://img.shields.io/github/stars/srikanth-iyengar/karate-chop-debugger.svg?style=social)](https://github.com/srikanth-iyengar/karate-chop-debugger/stargazers)
+![IntelliJ Platform](https://img.shields.io/badge/IntelliJ_Platform-Enabled-blue?logo=intellij-idea)
+![Gradle](https://img.shields.io/badge/Build-Gradle-green?logo=gradle)
 
-**An unofficial IntelliJ plugin** to **debug your Karate test cases** like never before. Say goodbye to cryptic console logs—step through your scenarios, inspect variables, and navigate through test files visually.
+
+**An IntelliJ plugin** to **debug your Karate test cases** like never before. Say goodbye to cryptic console logs—step through your scenarios, inspect variables, and navigate through test files visually.
 
 > 📝 _This is an unofficial, community-developed plugin._
 
@@ -79,7 +90,7 @@ Have suggestions or bugs? Feel free to [open an issue](https://github.com/srikan
 
 ## 📄 License
 
-This project is licensed under the [GPL v3](LICENSE).
+This project is licensed under the [MIT](LICENSE).
 
 > 🚨 This is an unofficial plugin and is not associated with any official testing framework or organization.
 
