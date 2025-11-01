@@ -1,5 +1,6 @@
 package `in`.srikanthk.devlabs.kchopdebugger.ui
 
+import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.openapi.project.Project
@@ -13,8 +14,10 @@ import java.awt.BorderLayout
 import java.awt.datatransfer.DataFlavor
 import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
-import java.util.Properties
-import javax.swing.*
+import javax.swing.AbstractAction
+import javax.swing.JPanel
+import javax.swing.JTable
+import javax.swing.KeyStroke
 import javax.swing.event.TableModelEvent
 import javax.swing.table.AbstractTableModel
 import javax.swing.table.DefaultTableCellRenderer
@@ -48,6 +51,7 @@ class PropertiesEditorPanel(val project: Project) : JPanel(BorderLayout()) {
                 text = if (shouldMask && !isEditing(table, row, column)) "•".repeat(entry.value.length) else entry.value
                 return comp
             }
+
             private fun isEditing(table: JTable, row: Int, col: Int) =
                 table.editingRow == row && table.editingColumn == col
         }
@@ -85,7 +89,7 @@ class PropertiesEditorPanel(val project: Project) : JPanel(BorderLayout()) {
                 }
             }
             .addExtraAction(object :
-                ToolbarDecorator.ElementActionButton("Paste", null, com.intellij.icons.AllIcons.Actions.MenuPaste) {
+                AnAction("Paste", null, com.intellij.icons.AllIcons.Actions.MenuPaste) {
                 override fun actionPerformed(p0: AnActionEvent) {
                     val clipboardText = CopyPasteManager.getInstance()
                         .getContents<String>(DataFlavor.stringFlavor) ?: return
@@ -104,7 +108,7 @@ class PropertiesEditorPanel(val project: Project) : JPanel(BorderLayout()) {
 
     private fun loadProperties() {
         val state = karatePropertiesState?.state ?: return
-        val entries = state.state.entries.map { PropertyEntry(it.key.toString(), it.value.toString()) }
+        val entries = state.state.entries.map { PropertyEntry(it.key, it.value) }
         tableModel.setData(entries)
     }
 

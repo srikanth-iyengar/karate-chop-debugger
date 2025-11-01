@@ -1,6 +1,6 @@
 # 🥋 Karate Chop Debugger
 
-**An unofficial IntelliJ plugin** to **debug your Karate test cases** like never before. Say goodbye to cryptic console logs—step through your scenarios, inspect variables, and navigate through test files visually.
+**An IntelliJ plugin** to **debug your Karate test cases** like never before. Say goodbye to cryptic console logs—step through your scenarios, inspect variables, and navigate through test files visually.
 
 > 📝 _This is an unofficial, community-developed plugin._
 
@@ -79,7 +79,7 @@ Have suggestions or bugs? Feel free to [open an issue](https://github.com/srikan
 
 ## 📄 License
 
-This project is licensed under the [GPL v3](LICENSE).
+This project is licensed under the [MIT](LICENSE).
 
 > 🚨 This is an unofficial plugin and is not associated with any official testing framework or organization.
 
