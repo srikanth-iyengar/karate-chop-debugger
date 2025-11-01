@@ -25,7 +25,11 @@
 Watch the plugin in action:
 
 
-https://github.com/user-attachments/assets/97a5d920-f316-404a-b05a-0900b020c046
+
+
+https://github.com/user-attachments/assets/cfe2c973-9f7f-439e-9b70-dab15806c846
+
+
 
 
 ---
