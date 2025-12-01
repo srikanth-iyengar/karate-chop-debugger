@@ -14,13 +14,7 @@ public interface KarateBackground extends PsiElement {
   List<KarateDescription> getDescriptionList();
 
   @NotNull
-  List<KarateDocString> getDocStringList();
-
-  @NotNull
   List<KarateStep> getStepList();
-
-  @NotNull
-  List<KarateTable> getTableList();
 
   @NotNull
   List<KarateTags> getTagsList();

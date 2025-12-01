@@ -11,44 +11,20 @@ import static in.srikanthk.devlabs.kchopdebugger.language.KarateTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import in.srikanthk.devlabs.kchopdebugger.language.psi.*;
 
-public class KarateBackgroundImpl extends ASTWrapperPsiElement implements KarateBackground {
+public class KarateVarTypeImpl extends ASTWrapperPsiElement implements KarateVarType {
 
-  public KarateBackgroundImpl(@NotNull ASTNode node) {
+  public KarateVarTypeImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull KarateVisitor visitor) {
-    visitor.visitBackground(this);
+    visitor.visitVarType(this);
   }
 
   @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof KarateVisitor) accept((KarateVisitor)visitor);
     else super.accept(visitor);
-  }
-
-  @Override
-  @NotNull
-  public List<KarateComment> getCommentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, KarateComment.class);
-  }
-
-  @Override
-  @NotNull
-  public List<KarateDescription> getDescriptionList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, KarateDescription.class);
-  }
-
-  @Override
-  @NotNull
-  public List<KarateStep> getStepList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, KarateStep.class);
-  }
-
-  @Override
-  @NotNull
-  public List<KarateTags> getTagsList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, KarateTags.class);
   }
 
 }

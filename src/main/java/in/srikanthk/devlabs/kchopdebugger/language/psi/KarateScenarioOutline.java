@@ -14,16 +14,10 @@ public interface KarateScenarioOutline extends PsiElement {
   KarateDescription getDescription();
 
   @NotNull
-  List<KarateDocString> getDocStringList();
-
-  @NotNull
   KarateExamples getExamples();
 
   @NotNull
   List<KarateStep> getStepList();
-
-  @NotNull
-  List<KarateTable> getTableList();
 
   @NotNull
   List<KarateTags> getTagsList();

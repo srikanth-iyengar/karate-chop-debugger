@@ -7,7 +7,15 @@ import com.intellij.psi.PsiElement;
 
 public class KarateVisitor extends PsiElementVisitor {
 
+  public void visitAssignment(@NotNull KarateAssignment o) {
+    visitPsiElement(o);
+  }
+
   public void visitBackground(@NotNull KarateBackground o) {
+    visitPsiElement(o);
+  }
+
+  public void visitBase(@NotNull KarateBase o) {
     visitPsiElement(o);
   }
 
@@ -31,7 +39,47 @@ public class KarateVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitExpression(@NotNull KarateExpression o) {
+    visitPsiElement(o);
+  }
+
+  public void visitFunctionCall(@NotNull KarateFunctionCall o) {
+    visitPsiElement(o);
+  }
+
+  public void visitIdentifier(@NotNull KarateIdentifier o) {
+    visitPsiElement(o);
+  }
+
+  public void visitJsonArray(@NotNull KarateJsonArray o) {
+    visitPsiElement(o);
+  }
+
+  public void visitJsonObject(@NotNull KarateJsonObject o) {
+    visitPsiElement(o);
+  }
+
+  public void visitKeyword(@NotNull KarateKeyword o) {
+    visitPsiElement(o);
+  }
+
   public void visitLine(@NotNull KarateLine o) {
+    visitPsiElement(o);
+  }
+
+  public void visitLiterals(@NotNull KarateLiterals o) {
+    visitPsiElement(o);
+  }
+
+  public void visitOperator(@NotNull KarateOperator o) {
+    visitPsiElement(o);
+  }
+
+  public void visitPostfix(@NotNull KaratePostfix o) {
+    visitPsiElement(o);
+  }
+
+  public void visitPrimary(@NotNull KaratePrimary o) {
     visitPsiElement(o);
   }
 
@@ -52,6 +100,14 @@ public class KarateVisitor extends PsiElementVisitor {
   }
 
   public void visitTags(@NotNull KarateTags o) {
+    visitPsiElement(o);
+  }
+
+  public void visitUnaryOperator(@NotNull KarateUnaryOperator o) {
+    visitPsiElement(o);
+  }
+
+  public void visitVarType(@NotNull KarateVarType o) {
     visitPsiElement(o);
   }
 

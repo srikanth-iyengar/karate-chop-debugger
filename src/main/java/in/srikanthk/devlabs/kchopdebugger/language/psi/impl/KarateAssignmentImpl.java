@@ -11,14 +11,14 @@ import static in.srikanthk.devlabs.kchopdebugger.language.KarateTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import in.srikanthk.devlabs.kchopdebugger.language.psi.*;
 
-public class KarateBackgroundImpl extends ASTWrapperPsiElement implements KarateBackground {
+public class KarateAssignmentImpl extends ASTWrapperPsiElement implements KarateAssignment {
 
-  public KarateBackgroundImpl(@NotNull ASTNode node) {
+  public KarateAssignmentImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull KarateVisitor visitor) {
-    visitor.visitBackground(this);
+    visitor.visitAssignment(this);
   }
 
   @Override
@@ -28,27 +28,21 @@ public class KarateBackgroundImpl extends ASTWrapperPsiElement implements Karate
   }
 
   @Override
-  @NotNull
-  public List<KarateComment> getCommentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, KarateComment.class);
+  @Nullable
+  public KarateExpression getExpression() {
+    return findChildByClass(KarateExpression.class);
   }
 
   @Override
   @NotNull
-  public List<KarateDescription> getDescriptionList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, KarateDescription.class);
+  public KarateIdentifier getIdentifier() {
+    return findNotNullChildByClass(KarateIdentifier.class);
   }
 
   @Override
-  @NotNull
-  public List<KarateStep> getStepList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, KarateStep.class);
-  }
-
-  @Override
-  @NotNull
-  public List<KarateTags> getTagsList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, KarateTags.class);
+  @Nullable
+  public KarateVarType getVarType() {
+    return findChildByClass(KarateVarType.class);
   }
 
 }

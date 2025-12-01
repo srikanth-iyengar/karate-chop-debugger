@@ -5,18 +5,15 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface KarateScenario extends PsiElement {
+public interface KarateJsonObject extends PsiElement {
 
   @NotNull
-  List<KarateComment> getCommentList();
-
-  @Nullable
-  KarateDescription getDescription();
+  List<KarateExpression> getExpressionList();
 
   @NotNull
-  List<KarateStep> getStepList();
+  List<KarateJsonArray> getJsonArrayList();
 
   @NotNull
-  List<KarateTags> getTagsList();
+  List<KarateJsonObject> getJsonObjectList();
 
 }

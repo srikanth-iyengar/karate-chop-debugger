@@ -22,13 +22,11 @@ line ::= NEWLINE? (word | WS_KEY)+
 
 tags ::= NEWLINE? TAGS_KEY+
 
-background ::= (comment|tags)* NEWLINE? BACKGROUND_KEYWORD description* (step | doc_string | table)*
+background ::= (comment|tags)* NEWLINE? BACKGROUND_KEYWORD description* step*
 
-step ::= comment? NEWLINE? (STAR_STEP | GIVEN_STEP | WHEN_STEP | THEN_STEP | AND_STEP | BUT_STEP) line*
+scenario ::= (comment|tags)* NEWLINE? SCENARIO_KEYWORD description? step*
 
-scenario ::= (comment|tags)* NEWLINE? SCENARIO_KEYWORD description? (step | doc_string | table)*
-
-scenario_outline ::= (comment|tags)* NEWLINE? SCENARIO_OUTLINE_KEYWORD description? (step | doc_string | table)* examples
+scenario_outline ::= (comment|tags)* NEWLINE? SCENARIO_OUTLINE_KEYWORD description? step* examples
 
 examples ::= comment? EXAMPLES_KEYWORD table*
 
@@ -39,3 +37,94 @@ doc_string ::= comment? DOC_STRING_START doc_content DOC_STRING_END
 doc_content ::= DOC_STRING_CONTENT*
 
 word ::= (WORD_KEY | TABLE_ROW)
+
+step ::= comment? NEWLINE? ((STAR_STEP | GIVEN_STEP | WHEN_STEP | THEN_STEP | AND_STEP | BUT_STEP) WS_KEY+ expression NEWLINE*) | doc_string | table
+
+expression ::= unary_operator? primary ((operator | WS_KEY*) expression)*
+
+primary ::= base postfix*
+
+base ::= identifier
+       | literals
+       | assignment
+       | L_PAREN expression R_PAREN
+
+postfix ::= function_call
+          | DOT_OPERATOR identifier
+          | L_SQUARE expression R_SQUARE
+          | (WS_KEY* COMMA expression)
+
+function_call ::= L_PAREN (expression (WS_KEY* COMMA expression)*)? R_PAREN
+
+assignment ::= var_type? WS_KEY* identifier WS_KEY* ASSIGNMENT_OPERATOR WS_KEY* expression?
+
+identifier ::= keyword |
+               IDENTIFIER_KEYWORD
+
+json_object ::= L_CURLY (COMMA?
+                    WS_KEY* (IDENTIFIER_KEYWORD | STRING_LITERAL) WS_KEY* COLON_OPERATOR
+                        WS_KEY* (STRING_LITERAL |
+                         NUMBER_LITERAL |
+                         BOOLEAN_LITERAL |
+                         NULL_LITERAL |
+                         json_array |
+                         json_object | (OCTOTHORPE L_PAREN expression R_PAREN)))* WS_KEY*
+                R_CURLY
+
+json_array ::= L_SQUARE (COMMA? (json_object| json_array | NUMBER_LITERAL | STRING_LITERAL | BOOLEAN_LITERAL | NULL_LITERAL))* R_SQUARE
+
+var_type ::= DEF_KEYWORD |
+             JSON_KEYWORD |
+             XML_KEYWORD |
+             XMLSTRING_KEYWORD
+
+literals ::= STRING_LITERAL |
+               NUMBER_LITERAL |
+               NULL_LITERAL |
+               BOOLEAN_LITERAL |
+               json_object |
+               json_array
+
+unary_operator ::= WS_KEY* (PLUS_OPERATOR |
+                 MINUS_OPERATOR |
+                 BANG_OPERATOR |
+                 TILDE_OPERATOR) WS_KEY*
+
+operator ::= WS_KEY* (PLUS_OPERATOR |
+             MINUS_OPERATOR |
+             MULTIPLY_OPERATOR |
+             DIVIDE_OPERATOR |
+             MODULO_OPERATOR |
+             EQUALS_OPERATOR |
+             NOT_EQUALS_OPERATOR |
+             GREATER_THAN_OPERATOR |
+             LESS_THAN_OPERATOR |
+             LESS_THAN_EQUAL_OPERATOR |
+             GREATER_THAN_EQUAL_OPERATOR |
+             LOGICAL_OR_OPERATOR |
+             LOGICAL_AND_OPERATOR |
+             LOGICAL_XOR_OPERATOR |
+             TERNARY_OPERATOR |
+             COLON_OPERATOR |
+             ASSIGNMENT_OPERATOR |
+             PIPE_OPERATOR |
+             AMPERSAND_OPERATOR |
+             BANG_OPERATOR |
+             ARROW_OPERATOR |
+             TILDE_OPERATOR) WS_KEY*
+
+keyword ::= KARATE_KEYWORD |
+            CALL_KEYWORD |
+            CALLONCE_KEYWORD |
+            READ_KEYWORD |
+            PRINT_KEYWORD |
+            MATCH_KEYWORD |
+            SET_KEYWORD |
+            TABLE_KEYWORD |
+            NULL_KEYWORD |
+            DRIVER_KEYWORD |
+            CONFIGURE_KEYWORD |
+            FUNCTION_KEYWORD |
+            RETURN_KEYWORD |
+            IF_KEYWORD |
+            ELSE_KEYWORD
