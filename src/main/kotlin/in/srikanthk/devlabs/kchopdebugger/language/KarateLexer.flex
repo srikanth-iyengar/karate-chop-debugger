@@ -55,6 +55,7 @@ WORD_NON_WS = [^ \t\r\n]
   "Background:"                              { yybegin(SCENARIO); return BACKGROUND_KEYWORD; }
   "Scenario:"                                { yybegin(SCENARIO); return SCENARIO_KEYWORD; }
   "Scenario Outline:"                        { yybegin(SCENARIO); return SCENARIO_OUTLINE_KEYWORD; }
+  "@" {CHAR}+ {LF}                             { return TAGS_KEY; }
 
   {BOL}+ "#" .*                               { return COMMENT_STMT; }
   {WS}                                        { return WS_KEY; }
@@ -74,6 +75,7 @@ WORD_NON_WS = [^ \t\r\n]
   "Scenario Outline:"                         { return SCENARIO_OUTLINE_KEYWORD; }
   "Examples:"                                 { return EXAMPLES_KEYWORD; }
 
+  "@" {CHAR}+ {LF}                             { return TAGS_KEY; }
   "|" {CHAR}+                                 { return TABLE_ROW; }
   "\"\"\""                                    { yybegin(DOC_STRING_BLOCK); return DOC_STRING_START; }
   {BOL}*"#" .*                                { return COMMENT_STMT; }
@@ -129,6 +131,7 @@ WORD_NON_WS = [^ \t\r\n]
     "def"                                   { return DEF_KEYWORD; }
     "json"                                  { return JSON_KEYWORD; }
     "xml"                                   { return XML_KEYWORD; }
+    ";"                                     { return SEMICOLON; }
 
     // STRING LITERALS
     "'" (\\.|[^\\'\r\n])* "'"               { return STRING_LITERAL; }

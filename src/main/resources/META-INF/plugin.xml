@@ -56,11 +56,9 @@
         <lang.syntaxHighlighterFactory
                 language="karate-dsl"
                 implementationClass="in.srikanthk.devlabs.kchopdebugger.language.KarateSyntaxHighlighterFactory"/>
+        <completion.contributor language="karate-dsl" implementationClass="in.srikanthk.devlabs.kchopdebugger.language.KarateCompletionContributor" />
         <multiHostInjector
                 implementation="in.srikanthk.devlabs.kchopdebugger.language.annotator.injector.KarateDocStringInjector"/>
-<!--        <annotator language="karate-dsl"-->
-<!--                   implementationClass="in.srikanthk.devlabs.kchopdebugger.language.annotator.KarateStepAnnotator"-->
-<!--        />-->
         <annotator language="karate-dsl"
                    implementationClass="in.srikanthk.devlabs.kchopdebugger.language.annotator.KarateDescriptionAnnotator"
         />

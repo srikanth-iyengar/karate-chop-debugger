@@ -363,35 +363,47 @@ public class KarateParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (comment|tags)* FEATURE_KEYWORD description? background? (scenario | scenario_outline)* NEWLINE*
+  // NEWLINE* (comment|tags)* FEATURE_KEYWORD description? background? (scenario | scenario_outline)* NEWLINE*
   static boolean feature(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "feature")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = feature_0(b, l + 1);
+    r = r && feature_1(b, l + 1);
     r = r && consumeToken(b, FEATURE_KEYWORD);
-    r = r && feature_2(b, l + 1);
     r = r && feature_3(b, l + 1);
     r = r && feature_4(b, l + 1);
     r = r && feature_5(b, l + 1);
+    r = r && feature_6(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
 
-  // (comment|tags)*
+  // NEWLINE*
   private static boolean feature_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "feature_0")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!feature_0_0(b, l + 1)) break;
+      if (!consumeToken(b, NEWLINE)) break;
       if (!empty_element_parsed_guard_(b, "feature_0", c)) break;
     }
     return true;
   }
 
+  // (comment|tags)*
+  private static boolean feature_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "feature_1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!feature_1_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "feature_1", c)) break;
+    }
+    return true;
+  }
+
   // comment|tags
-  private static boolean feature_0_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "feature_0_0")) return false;
+  private static boolean feature_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "feature_1_0")) return false;
     boolean r;
     r = comment(b, l + 1);
     if (!r) r = tags(b, l + 1);
@@ -399,33 +411,33 @@ public class KarateParser implements PsiParser, LightPsiParser {
   }
 
   // description?
-  private static boolean feature_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "feature_2")) return false;
+  private static boolean feature_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "feature_3")) return false;
     description(b, l + 1);
     return true;
   }
 
   // background?
-  private static boolean feature_3(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "feature_3")) return false;
+  private static boolean feature_4(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "feature_4")) return false;
     background(b, l + 1);
     return true;
   }
 
   // (scenario | scenario_outline)*
-  private static boolean feature_4(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "feature_4")) return false;
+  private static boolean feature_5(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "feature_5")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!feature_4_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "feature_4", c)) break;
+      if (!feature_5_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "feature_5", c)) break;
     }
     return true;
   }
 
   // scenario | scenario_outline
-  private static boolean feature_4_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "feature_4_0")) return false;
+  private static boolean feature_5_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "feature_5_0")) return false;
     boolean r;
     r = scenario(b, l + 1);
     if (!r) r = scenario_outline(b, l + 1);
@@ -433,12 +445,12 @@ public class KarateParser implements PsiParser, LightPsiParser {
   }
 
   // NEWLINE*
-  private static boolean feature_5(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "feature_5")) return false;
+  private static boolean feature_6(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "feature_6")) return false;
     while (true) {
       int c = current_position_(b);
       if (!consumeToken(b, NEWLINE)) break;
-      if (!empty_element_parsed_guard_(b, "feature_5", c)) break;
+      if (!empty_element_parsed_guard_(b, "feature_6", c)) break;
     }
     return true;
   }
@@ -519,6 +531,42 @@ public class KarateParser implements PsiParser, LightPsiParser {
     r = keyword(b, l + 1);
     if (!r) r = consumeToken(b, IDENTIFIER_KEYWORD);
     exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // FUNCTION_KEYWORD L_PAREN R_PAREN L_CURLY (expression SEMICOLON)* R_CURLY
+  public static boolean js_func(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "js_func")) return false;
+    if (!nextTokenIs(b, FUNCTION_KEYWORD)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeTokens(b, 0, FUNCTION_KEYWORD, L_PAREN, R_PAREN, L_CURLY);
+    r = r && js_func_4(b, l + 1);
+    r = r && consumeToken(b, R_CURLY);
+    exit_section_(b, m, JS_FUNC, r);
+    return r;
+  }
+
+  // (expression SEMICOLON)*
+  private static boolean js_func_4(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "js_func_4")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!js_func_4_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "js_func_4", c)) break;
+    }
+    return true;
+  }
+
+  // expression SEMICOLON
+  private static boolean js_func_4_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "js_func_4_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = expression(b, l + 1);
+    r = r && consumeToken(b, SEMICOLON);
+    exit_section_(b, m, null, r);
     return r;
   }
 
@@ -1152,7 +1200,7 @@ public class KarateParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // comment? NEWLINE? ((STAR_STEP | GIVEN_STEP | WHEN_STEP | THEN_STEP | AND_STEP | BUT_STEP) WS_KEY+ expression NEWLINE*) | doc_string | table
+  // comment? NEWLINE? ((STAR_STEP | GIVEN_STEP | WHEN_STEP | THEN_STEP | AND_STEP | BUT_STEP) WS_KEY+ expression SEMICOLON? (NEWLINE | WS_KEY)*) | doc_string | table
   public static boolean step(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "step")) return false;
     boolean r;
@@ -1164,7 +1212,7 @@ public class KarateParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // comment? NEWLINE? ((STAR_STEP | GIVEN_STEP | WHEN_STEP | THEN_STEP | AND_STEP | BUT_STEP) WS_KEY+ expression NEWLINE*)
+  // comment? NEWLINE? ((STAR_STEP | GIVEN_STEP | WHEN_STEP | THEN_STEP | AND_STEP | BUT_STEP) WS_KEY+ expression SEMICOLON? (NEWLINE | WS_KEY)*)
   private static boolean step_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "step_0")) return false;
     boolean r;
@@ -1190,7 +1238,7 @@ public class KarateParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // (STAR_STEP | GIVEN_STEP | WHEN_STEP | THEN_STEP | AND_STEP | BUT_STEP) WS_KEY+ expression NEWLINE*
+  // (STAR_STEP | GIVEN_STEP | WHEN_STEP | THEN_STEP | AND_STEP | BUT_STEP) WS_KEY+ expression SEMICOLON? (NEWLINE | WS_KEY)*
   private static boolean step_0_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "step_0_2")) return false;
     boolean r;
@@ -1199,6 +1247,7 @@ public class KarateParser implements PsiParser, LightPsiParser {
     r = r && step_0_2_1(b, l + 1);
     r = r && expression(b, l + 1);
     r = r && step_0_2_3(b, l + 1);
+    r = r && step_0_2_4(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
@@ -1231,15 +1280,31 @@ public class KarateParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // NEWLINE*
+  // SEMICOLON?
   private static boolean step_0_2_3(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "step_0_2_3")) return false;
+    consumeToken(b, SEMICOLON);
+    return true;
+  }
+
+  // (NEWLINE | WS_KEY)*
+  private static boolean step_0_2_4(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "step_0_2_4")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!consumeToken(b, NEWLINE)) break;
-      if (!empty_element_parsed_guard_(b, "step_0_2_3", c)) break;
+      if (!step_0_2_4_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "step_0_2_4", c)) break;
     }
     return true;
+  }
+
+  // NEWLINE | WS_KEY
+  private static boolean step_0_2_4_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "step_0_2_4_0")) return false;
+    boolean r;
+    r = consumeToken(b, NEWLINE);
+    if (!r) r = consumeToken(b, WS_KEY);
+    return r;
   }
 
   /* ********************************************************** */

@@ -21,6 +21,7 @@ public interface KarateTypes {
   IElementType IDENTIFIER = new KarateElementType("IDENTIFIER");
   IElementType JSON_ARRAY = new KarateElementType("JSON_ARRAY");
   IElementType JSON_OBJECT = new KarateElementType("JSON_OBJECT");
+  IElementType JS_FUNC = new KarateElementType("JS_FUNC");
   IElementType KEYWORD = new KarateElementType("KEYWORD");
   IElementType LINE = new KarateElementType("LINE");
   IElementType LITERALS = new KarateElementType("LITERALS");
@@ -97,6 +98,7 @@ public interface KarateTypes {
   IElementType R_SQUARE = new KarateTokenType("R_SQUARE");
   IElementType SCENARIO_KEYWORD = new KarateTokenType("SCENARIO_KEYWORD");
   IElementType SCENARIO_OUTLINE_KEYWORD = new KarateTokenType("SCENARIO_OUTLINE_KEYWORD");
+  IElementType SEMICOLON = new KarateTokenType("SEMICOLON");
   IElementType SET_KEYWORD = new KarateTokenType("SET_KEYWORD");
   IElementType STAR_STEP = new KarateTokenType("STAR_STEP");
   IElementType STRING_LITERAL = new KarateTokenType("STRING_LITERAL");
@@ -153,6 +155,9 @@ public interface KarateTypes {
       }
       else if (type == JSON_OBJECT) {
         return new KarateJsonObjectImpl(node);
+      }
+      else if (type == JS_FUNC) {
+        return new KarateJsFuncImpl(node);
       }
       else if (type == KEYWORD) {
         return new KarateKeywordImpl(node);

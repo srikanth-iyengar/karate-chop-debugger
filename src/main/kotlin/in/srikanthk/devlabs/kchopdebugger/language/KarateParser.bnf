@@ -12,7 +12,7 @@
   tokenTypeClass = "in.srikanthk.devlabs.kchopdebugger.language.KarateTokenType";
 }
 
-feature ::= (comment|tags)* FEATURE_KEYWORD description? background? (scenario | scenario_outline)* NEWLINE*
+feature ::= NEWLINE* (comment|tags)* FEATURE_KEYWORD description? background? (scenario | scenario_outline)* NEWLINE*
 
 comment ::= COMMENT_STMT
 
@@ -38,7 +38,7 @@ doc_content ::= DOC_STRING_CONTENT*
 
 word ::= (WORD_KEY | TABLE_ROW)
 
-step ::= comment? NEWLINE? ((STAR_STEP | GIVEN_STEP | WHEN_STEP | THEN_STEP | AND_STEP | BUT_STEP) WS_KEY+ expression NEWLINE*) | doc_string | table
+step ::= comment? NEWLINE? ((STAR_STEP | GIVEN_STEP | WHEN_STEP | THEN_STEP | AND_STEP | BUT_STEP) WS_KEY+ expression SEMICOLON? (NEWLINE | WS_KEY)*) | doc_string | table
 
 expression ::= unary_operator? primary ((operator | WS_KEY*) expression)*
 

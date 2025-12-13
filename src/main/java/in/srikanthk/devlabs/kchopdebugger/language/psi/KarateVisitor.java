@@ -51,6 +51,10 @@ public class KarateVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitJsFunc(@NotNull KarateJsFunc o) {
+    visitPsiElement(o);
+  }
+
   public void visitJsonArray(@NotNull KarateJsonArray o) {
     visitPsiElement(o);
   }
