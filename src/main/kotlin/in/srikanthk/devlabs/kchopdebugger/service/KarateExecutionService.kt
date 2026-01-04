@@ -242,6 +242,7 @@ class KarateExecutionService(val project: Project) {
             emptyMap()
         )
 
+        responsePublisher.updateState(DebuggerState.Started)
         runner.run(parameters, null, callback)
         return true
     }

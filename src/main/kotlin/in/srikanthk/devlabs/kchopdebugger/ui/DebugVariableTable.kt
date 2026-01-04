@@ -164,6 +164,14 @@ class DebugVariableTable(private val project: Project) : JPanel(BorderLayout()) 
                         resultField.text = "Evaluation result will appear here"
                         jsonResultString = ""
                     }
+                    if (state == DebuggerState.Halted) {
+                        table.isEnabled = true
+                        evalPanel.isEnabled = true
+                    } else {
+                        table.isEnabled = true
+                        tableModel.setNumRows(0)
+                        evalPanel.isEnabled = false
+                    }
                 }
             }
 

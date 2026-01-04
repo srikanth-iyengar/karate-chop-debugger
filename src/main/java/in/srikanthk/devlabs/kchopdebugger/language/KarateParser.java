@@ -216,7 +216,7 @@ public class KarateParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (comment|tags)* FEATURE_KEYWORD description? background? (scenario | scenario_outline)* NEWLINE*
+  // (comment|tags|NEWLINE)* FEATURE_KEYWORD description? background? (scenario | scenario_outline)* NEWLINE*
   static boolean feature(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "feature")) return false;
     boolean r;
@@ -231,7 +231,7 @@ public class KarateParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // (comment|tags)*
+  // (comment|tags|NEWLINE)*
   private static boolean feature_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "feature_0")) return false;
     while (true) {
@@ -242,12 +242,13 @@ public class KarateParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // comment|tags
+  // comment|tags|NEWLINE
   private static boolean feature_0_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "feature_0_0")) return false;
     boolean r;
     r = comment(b, l + 1);
     if (!r) r = tags(b, l + 1);
+    if (!r) r = consumeToken(b, NEWLINE);
     return r;
   }
 
