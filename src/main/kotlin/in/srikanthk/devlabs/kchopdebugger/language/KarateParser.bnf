@@ -12,7 +12,7 @@
   tokenTypeClass = "in.srikanthk.devlabs.kchopdebugger.language.KarateTokenType";
 }
 
-feature ::= (comment|tags)* FEATURE_KEYWORD description? background? (scenario | scenario_outline)* NEWLINE*
+feature ::= (comment|tags|NEWLINE)* FEATURE_KEYWORD description? background? (scenario | scenario_outline)* NEWLINE*
 
 comment ::= COMMENT_STMT
 
