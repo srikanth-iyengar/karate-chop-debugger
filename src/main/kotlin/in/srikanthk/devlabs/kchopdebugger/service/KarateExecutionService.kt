@@ -46,6 +46,7 @@ class KarateExecutionService(val project: Project) {
     private var process: Process? = null
     var lastExecutedFileName: String? = null
     var lastScenarioName: String? = null
+    private var lastBuildTimestamp: Long = 0
 
     fun getBreakpoints() : Map<String, ConcurrentSkipListSet<*>>{
         val breakpoints = HashMap<String, ConcurrentSkipListSet<Int>>()
@@ -75,9 +76,11 @@ class KarateExecutionService(val project: Project) {
         }
         this.lastExecutedFileName = fileName
         this.lastScenarioName = scenarioName
-        buildMavenProject {
-            ApplicationManager.getApplication().executeOnPooledThread {
-                val featureClasspath = fileName.substring(projectBasePath.length + 1)
+
+        // Skip Maven build by default - use source directories directly
+        ApplicationManager.getApplication().executeOnPooledThread {
+            responsePublisher.updateState(DebuggerState.Started)
+            val featureClasspath = fileName.substring(projectBasePath.length + 1)
 
                 val urls = getMavenDependenciesURL().joinToString(";");
                 val breakpointJson = mapper.writeValueAsString(getBreakpoints())
@@ -193,7 +196,6 @@ class KarateExecutionService(val project: Project) {
                 Files.deleteIfExists(breakpointPath)
                 this.process = null
             }
-        }
     }
 
     fun getProjectJavaExecutable(project: Project): String {
@@ -243,18 +245,98 @@ class KarateExecutionService(val project: Project) {
         )
 
         responsePublisher.updateState(DebuggerState.Started)
-        runner.run(parameters, null, callback)
+        runner.run(parameters, null, Runnable {
+            updateBuildTimestamp()
+            callback.run()
+        })
         return true
     }
 
     fun hotReload(callback: Runnable) {
-        buildMavenProject(callback)
+        if (needsMavenBuild()) {
+            buildMavenProject(callback)
+        } else {
+            callback.run()
+        }
+    }
+
+    private fun needsMavenBuild(): Boolean {
+        val srcTestJava = File(project.basePath, "src/test/java")
+        val srcTestResources = File(project.basePath, "src/test/resources")
+
+        if (!srcTestJava.exists() && !srcTestResources.exists()) {
+            return true
+        }
+
+        if (lastBuildTimestamp == 0L) {
+            return true
+        }
+
+        if (srcTestJava.exists()) {
+            val hasJavaChanges = srcTestJava.walkTopDown()
+                .filter { it.isFile && it.extension == "java" }
+                .any { it.lastModified() > lastBuildTimestamp }
+            if (hasJavaChanges) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    fun needsFeatureReload(): Boolean {
+        val srcTestJava = File(project.basePath, "src/test/java")
+        val srcTestResources = File(project.basePath, "src/test/resources")
+
+        if (!srcTestJava.exists() && !srcTestResources.exists()) {
+            return false
+        }
+
+        if (lastBuildTimestamp == 0L) {
+            return false
+        }
+
+        var hasFeatureChanges = false
+
+        if (srcTestJava.exists()) {
+            hasFeatureChanges = srcTestJava.walkTopDown()
+                .filter { it.isFile && it.extension == "feature" }
+                .any { it.lastModified() > lastBuildTimestamp }
+        }
+
+        if (!hasFeatureChanges && srcTestResources.exists()) {
+            hasFeatureChanges = srcTestResources.walkTopDown()
+                .filter { it.isFile && it.extension == "feature" }
+                .any { it.lastModified() > lastBuildTimestamp }
+        }
+
+        return hasFeatureChanges
+    }
+
+    private fun updateBuildTimestamp() {
+        lastBuildTimestamp = System.currentTimeMillis()
     }
 
     private fun getMavenDependenciesURL(): List<String> {
-        val mavenProjectManager = MavenProjectsManager.getInstance(project);
-        val dependencies = ArrayList(mavenProjectManager.projects[0].dependencies.map { dep -> dep.file.path });
-        dependencies.add(File(getTestClassesPath()).path);
+        val mavenProjectManager = MavenProjectsManager.getInstance(project)
+        val dependencies = ArrayList(mavenProjectManager.projects[0].dependencies.map { dep -> dep.file.path })
+
+        // Add target/test-classes if it exists (from previous builds)
+        val testClassesPath = getTestClassesPath()
+        if (File(testClassesPath).exists()) {
+            dependencies.add(testClassesPath)
+        }
+
+        // Add source directories for direct feature file loading (skips Maven build)
+        val srcTestJava = File(project.basePath, "src/test/java")
+        if (srcTestJava.exists()) {
+            dependencies.add(srcTestJava.path)
+        }
+
+        val srcTestResources = File(project.basePath, "src/test/resources")
+        if (srcTestResources.exists()) {
+            dependencies.add(srcTestResources.path)
+        }
 
         return dependencies
     }
