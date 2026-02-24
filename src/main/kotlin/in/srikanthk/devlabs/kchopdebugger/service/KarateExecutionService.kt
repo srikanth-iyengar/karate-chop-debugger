@@ -21,6 +21,7 @@ import `in`.srikanthk.devlabs.kchopdebugger.agent.topic.DebugResponse
 import `in`.srikanthk.devlabs.kchopdebugger.configuration.KaratePropertiesState
 import `in`.srikanthk.devlabs.kchopdebugger.topic.DebuggerInfoRequestTopic
 import `in`.srikanthk.devlabs.kchopdebugger.topic.DebuggerInfoResponseTopic
+import `in`.srikanthk.devlabs.kchopdebugger.utils.ProjectFileChecker
 import org.jetbrains.idea.maven.execution.MavenRunner
 import org.jetbrains.idea.maven.execution.MavenRunnerParameters
 import org.jetbrains.idea.maven.project.MavenProjectsManager
@@ -46,7 +47,7 @@ class KarateExecutionService(val project: Project) {
     private var process: Process? = null
     var lastExecutedFileName: String? = null
     var lastScenarioName: String? = null
-    private var lastBuildTimestamp: Long = 0
+    private val projectFileChecker = ProjectFileChecker(project.basePath!!)
 
     fun getBreakpoints() : Map<String, ConcurrentSkipListSet<*>>{
         val breakpoints = HashMap<String, ConcurrentSkipListSet<Int>>()
@@ -260,61 +261,12 @@ class KarateExecutionService(val project: Project) {
         }
     }
 
-    private fun needsMavenBuild(): Boolean {
-        val srcTestJava = File(project.basePath, "src/test/java")
-        val srcTestResources = File(project.basePath, "src/test/resources")
+    private fun needsMavenBuild(): Boolean = projectFileChecker.needsMavenBuild()
 
-        if (!srcTestJava.exists() && !srcTestResources.exists()) {
-            return true
-        }
-
-        if (lastBuildTimestamp == 0L) {
-            return true
-        }
-
-        if (srcTestJava.exists()) {
-            val hasJavaChanges = srcTestJava.walkTopDown()
-                .filter { it.isFile && it.extension == "java" }
-                .any { it.lastModified() > lastBuildTimestamp }
-            if (hasJavaChanges) {
-                return true
-            }
-        }
-
-        return false
-    }
-
-    fun needsFeatureReload(): Boolean {
-        val srcTestJava = File(project.basePath, "src/test/java")
-        val srcTestResources = File(project.basePath, "src/test/resources")
-
-        if (!srcTestJava.exists() && !srcTestResources.exists()) {
-            return false
-        }
-
-        if (lastBuildTimestamp == 0L) {
-            return false
-        }
-
-        var hasFeatureChanges = false
-
-        if (srcTestJava.exists()) {
-            hasFeatureChanges = srcTestJava.walkTopDown()
-                .filter { it.isFile && it.extension == "feature" }
-                .any { it.lastModified() > lastBuildTimestamp }
-        }
-
-        if (!hasFeatureChanges && srcTestResources.exists()) {
-            hasFeatureChanges = srcTestResources.walkTopDown()
-                .filter { it.isFile && it.extension == "feature" }
-                .any { it.lastModified() > lastBuildTimestamp }
-        }
-
-        return hasFeatureChanges
-    }
+    fun needsFeatureReload(): Boolean = projectFileChecker.needsFeatureReload()
 
     private fun updateBuildTimestamp() {
-        lastBuildTimestamp = System.currentTimeMillis()
+        projectFileChecker.setLastBuildTimestamp(System.currentTimeMillis())
     }
 
     private fun getMavenDependenciesURL(): List<String> {
@@ -322,29 +274,15 @@ class KarateExecutionService(val project: Project) {
         val dependencies = ArrayList(mavenProjectManager.projects[0].dependencies.map { dep -> dep.file.path })
 
         // Add target/test-classes if it exists (from previous builds)
-        val testClassesPath = getTestClassesPath()
-        if (File(testClassesPath).exists()) {
-            dependencies.add(testClassesPath)
+        val testClassesDir = projectFileChecker.getTargetTestClassesDir()
+        if (testClassesDir.exists()) {
+            dependencies.add(testClassesDir.path)
         }
 
         // Add source directories for direct feature file loading (skips Maven build)
-        val srcTestJava = File(project.basePath, "src/test/java")
-        if (srcTestJava.exists()) {
-            dependencies.add(srcTestJava.path)
-        }
-
-        val srcTestResources = File(project.basePath, "src/test/resources")
-        if (srcTestResources.exists()) {
-            dependencies.add(srcTestResources.path)
-        }
+        dependencies.addAll(projectFileChecker.getSourceDirectories().map { it.path })
 
         return dependencies
-    }
-
-    private fun getTestClassesPath(): String {
-        val testClassDir = File(File(project.basePath, "target"), "test-classes")
-
-        return testClassDir.path.toString()
     }
 
     fun createRemoteCallSubscriber(): DebugResponse {
