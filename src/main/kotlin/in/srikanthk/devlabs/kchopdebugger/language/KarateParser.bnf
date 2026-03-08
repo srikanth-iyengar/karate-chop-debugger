@@ -12,23 +12,23 @@
   tokenTypeClass = "in.srikanthk.devlabs.kchopdebugger.language.KarateTokenType";
 }
 
-feature ::= (comment|tags|NEWLINE)* FEATURE_KEYWORD description? background? (scenario | scenario_outline)* NEWLINE*
+feature ::= (comment|tags|NEWLINE)* FEATURE_KEYWORD description? (NEWLINE* background NEWLINE*)? ((scenario | scenario_outline) NEWLINE*)*
 
-comment ::= COMMENT_STMT
+comment ::= COMMENT_STMT NEWLINE*
 
 description ::= (line)+
 
 line ::= NEWLINE? (word | WS_KEY)+
 
-tags ::= NEWLINE? TAGS_KEY+
+tags ::= NEWLINE? TAGS_KEY NEWLINE*
 
-background ::= (comment|tags)* NEWLINE? BACKGROUND_KEYWORD description* (step | doc_string | table)*
+background ::= (comment|tags)* BACKGROUND_KEYWORD description* (step | doc_string | table)*
 
 step ::= comment? NEWLINE? (STAR_STEP | GIVEN_STEP | WHEN_STEP | THEN_STEP | AND_STEP | BUT_STEP) line*
 
-scenario ::= (comment|tags)* NEWLINE? SCENARIO_KEYWORD description? (step | doc_string | table)*
+scenario ::= (comment|tags)* SCENARIO_KEYWORD description? (step | doc_string | table)*
 
-scenario_outline ::= (comment|tags)* NEWLINE? SCENARIO_OUTLINE_KEYWORD description? (step | doc_string | table)* examples
+scenario_outline ::= (comment|tags)* SCENARIO_OUTLINE_KEYWORD description? (step | doc_string | table)* examples
 
 examples ::= comment? EXAMPLES_KEYWORD table*
 
