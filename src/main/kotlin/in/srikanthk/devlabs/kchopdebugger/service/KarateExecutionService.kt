@@ -1,7 +1,5 @@
 package `in`.srikanthk.devlabs.kchopdebugger.service
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
@@ -13,8 +11,10 @@ import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.xdebugger.XDebuggerManager
+import `in`.srikanthk.devlabs.kchopdebugger.agent.BreakpointFileCodec
 import `in`.srikanthk.devlabs.kchopdebugger.agent.DebugMessageBus
 import `in`.srikanthk.devlabs.kchopdebugger.agent.DebuggerState
+import `in`.srikanthk.devlabs.kchopdebugger.agent.KarateVariableSnapshot
 import `in`.srikanthk.devlabs.kchopdebugger.agent.communication.DebugServer
 import `in`.srikanthk.devlabs.kchopdebugger.agent.topic.DebugRequest
 import `in`.srikanthk.devlabs.kchopdebugger.agent.topic.DebugResponse
@@ -35,7 +35,6 @@ import kotlin.io.path.pathString
 
 @Service(Service.Level.PROJECT)
 class KarateExecutionService(val project: Project) {
-    val mapper = ObjectMapper()
     private val responsePublisher = project.messageBus.syncPublisher(DebuggerInfoResponseTopic.TOPIC)
     private val runPropertiesService = KaratePropertiesState.getInstance(project)
     val notificationGroup = NotificationGroupManager.getInstance()
@@ -47,17 +46,31 @@ class KarateExecutionService(val project: Project) {
     var lastExecutedFileName: String? = null
     var lastScenarioName: String? = null
 
-    fun getBreakpoints() : Map<String, ConcurrentSkipListSet<*>>{
+    /**
+     * Collects all editor breakpoints and groups them by source file path.
+     *
+     * @return A map where each key is an absolute file path and each value is a sorted set of 1-based line numbers with breakpoints in that file.
+     */
+    fun getBreakpoints(): Map<String, ConcurrentSkipListSet<Int>> {
         val breakpoints = HashMap<String, ConcurrentSkipListSet<Int>>()
         breakpointManager.allBreakpoints.forEach {
             it.sourcePosition?.let { sourcePosition ->
-                val list = breakpoints.computeIfAbsent(sourcePosition.file.path) { ConcurrentSkipListSet() };
+                val list = breakpoints.computeIfAbsent(sourcePosition.file.path) { ConcurrentSkipListSet() }
                 list.add(sourcePosition.line + 1)
             }
         }
         return breakpoints
     }
 
+    /**
+     * Starts a Karate debugging session for the given feature file, scheduling the work asynchronously.
+     *
+     * This will update the service's last-executed file and scenario, build the project, publish debugger messages on the IDE message bus, and launch an external Java process that runs the debug agent. If a debug session is already running a warning notification is shown and the call returns without starting a new session.
+     *
+     * @param fileName Absolute path to the feature file to execute.
+     * @param scenarioName Optional scenario name to run within the feature; ignored when null or blank.
+     * @param skipBreakpoints When true, instructs the agent to skip breakpoints for this run.
+     */
     fun executeSuite(fileName: String, scenarioName: String?, skipBreakpoints: Boolean = false) {
         if(this.process != null) {
             notificationGroup
@@ -78,13 +91,13 @@ class KarateExecutionService(val project: Project) {
         buildMavenProject {
             ApplicationManager.getApplication().executeOnPooledThread {
                 val featureClasspath = fileName.substring(projectBasePath.length + 1)
+                val projectBase = requireNotNull(project.basePath) { "Project base path is not available" }
 
-                val urls = getMavenDependenciesURL().joinToString(";");
-                val breakpointJson = mapper.writeValueAsString(getBreakpoints())
-                val breakpointPath = Files.createTempFile("breakpoints_", ".json")
+                val urls = getMavenDependenciesURL().joinToString(";")
+                val breakpointPath = Files.createTempFile("breakpoints_", ".txt")
                 Files.writeString(
                     breakpointPath,
-                    breakpointJson,
+                    BreakpointFileCodec.encode(getBreakpoints()),
                     StandardOpenOption.TRUNCATE_EXISTING,
                     StandardOpenOption.CREATE,
                     StandardOpenOption.WRITE
@@ -144,31 +157,25 @@ class KarateExecutionService(val project: Project) {
 
                 val debugServer = DebugServer.getInstance().start()
 
-                val vmOptions = buildString {
-                    runPropertiesService?.state?.state?.entries?.forEach { entry ->
-                        append("\"-D${entry.key}=${entry.value}\" ")
-                    }
-                    append("-Ddebug.port=${debugServer.port}")
-                }.trim()
-
-                val options = "$vmOptions -jar ${getAgentJarFile().path} $featureClasspath ${project.basePath} $breakpointPath $urls $skipBreakpoints ${scenarioName ?: ""}"
-                val argumentPath = Files.createTempFile("argument", ".txt")
-                Files.writeString(
-                    argumentPath,
-                    options.trim(),
-                    StandardOpenOption.TRUNCATE_EXISTING,
-                    StandardOpenOption.CREATE,
-                    StandardOpenOption.WRITE
-                )
-
-                val command =
-                    "${getProjectJavaExecutable(project)} @${argumentPath}"
+                val command = mutableListOf(getProjectJavaExecutable(project))
+                command.addAll(getVmOptions(debugServer.port))
+                command.add("-cp")
+                command.add(getAgentLaunchClasspath())
+                command.add("in.srikanthk.devlabs.kchopdebugger.agent.Main")
+                command.add(featureClasspath)
+                command.add(projectBase)
+                command.add(breakpointPath.toString())
+                command.add(urls)
+                command.add(skipBreakpoints.toString())
+                if (!scenarioName.isNullOrBlank()) {
+                    command.add(scenarioName)
+                }
 
                 this.process =
-                    ProcessBuilder(*command.split(" ").toTypedArray())
+                    ProcessBuilder(command)
                         .redirectError(ProcessBuilder.Redirect.PIPE)
                         .redirectOutput(ProcessBuilder.Redirect.PIPE)
-                        .start();
+                        .start()
                 val stdout = BufferedReader(InputStreamReader(process?.inputStream))
                 val stderr = BufferedReader(InputStreamReader(process?.errorStream))
 
@@ -247,14 +254,39 @@ class KarateExecutionService(val project: Project) {
         return true
     }
 
+    /**
+     * Starts a Maven package build for the project and invokes the provided callback when the build finishes.
+     *
+     * @param callback Runnable to execute after the Maven build completes.
+     */
     fun hotReload(callback: Runnable) {
         buildMavenProject(callback)
     }
 
+    /**
+     * Builds a list of JVM system property arguments from configured run properties and the debug port.
+     *
+     * @param debugPort The port number used by the debug agent (added as `-Ddebug.port=<port>`).
+     * @return A list of VM option strings formatted as `-Dkey=value`, including the debug port entry.
+     */
+    private fun getVmOptions(debugPort: Int): List<String> {
+        val vmOptions = mutableListOf<String>()
+        runPropertiesService?.state?.state?.entries?.forEach { entry ->
+            vmOptions.add("-D${entry.key}=${entry.value}")
+        }
+        vmOptions.add("-Ddebug.port=$debugPort")
+        return vmOptions
+    }
+
+    /**
+     * Collects file paths for the first Maven project's dependency artifacts and the project's test-classes directory.
+     *
+     * @return A list of absolute filesystem paths: one entry per Maven dependency artifact followed by the target test-classes path.
+     */
     private fun getMavenDependenciesURL(): List<String> {
-        val mavenProjectManager = MavenProjectsManager.getInstance(project);
-        val dependencies = ArrayList(mavenProjectManager.projects[0].dependencies.map { dep -> dep.file.path });
-        dependencies.add(File(getTestClassesPath()).path);
+        val mavenProjectManager = MavenProjectsManager.getInstance(project)
+        val dependencies = ArrayList(mavenProjectManager.projects[0].dependencies.map { dep -> dep.file.path })
+        dependencies.add(File(getTestClassesPath()).path)
 
         return dependencies
     }
@@ -265,20 +297,15 @@ class KarateExecutionService(val project: Project) {
         return testClassDir.path.toString()
     }
 
+    /**
+     * Creates a DebugResponse subscriber that forwards debugger events to the project's response publisher.
+     *
+     * @return A DebugResponse that forwards variable updates, state changes, navigation requests, and evaluation results to the project's response publisher; `appendLog` is a no-op.
+     */
     fun createRemoteCallSubscriber(): DebugResponse {
         return object : DebugResponse {
-            override fun updateKarateVariable(vars: HashMap<String, String>) {
-                val objectMapper = ObjectMapper()
-                val parsedVars = HashMap<String, Map<String, Object>>();
-                for ((key, json) in vars) {
-                    try {
-                        val parsed = objectMapper.readValue(json, object : TypeReference<Map<String, Object>>() {})
-                        parsedVars[key] = parsed
-                    } catch (e: Exception) {
-                        // Optional: log or handle the malformed JSON case
-                    }
-                }
-                responsePublisher.updateKarateVariables(parsedVars);
+            override fun updateKarateVariable(vars: HashMap<String, KarateVariableSnapshot>) {
+                responsePublisher.updateKarateVariables(vars)
             }
 
             override fun updateState(state: DebuggerState) {
@@ -301,10 +328,31 @@ class KarateExecutionService(val project: Project) {
         }
     }
 
+    /**
+     * Locates the debug agent JAR file placed in the plugin's lib directory.
+     *
+     * @return The File pointing to the first JAR whose name starts with `debug-agent-`.
+     * @throws IllegalArgumentException if the plugin agent JAR cannot be found in the plugin's lib directory.
+     */
     fun getAgentJarFile(): File {
         val plugin = PluginManagerCore.getPlugin(PluginId.getId("in.srikanthk.devlabs.karate-chop-debugger"))
-        val jarFileName = "debug-agent-${plugin?.version}.jar"
         val pluginPath = plugin?.pluginPath
-        return File(File(pluginPath?.pathString, "lib"), jarFileName)
+        val libDir = File(pluginPath?.pathString, "lib")
+        return requireNotNull(libDir.listFiles()?.firstOrNull { it.name.startsWith("debug-agent-") && it.extension == "jar" }) {
+            "Debug agent jar not found in ${libDir.path}"
+        }
+    }
+
+    /**
+     * Builds a classpath string containing all JAR files in the agent's lib directory, sorted by file name.
+     *
+     * @return A platform path-separator separated string of absolute paths to the agent JAR files.
+     */
+    fun getAgentLaunchClasspath(): String {
+        val agentLibDir = getAgentJarFile().parentFile
+        return requireNotNull(agentLibDir.listFiles())
+            .filter { it.isFile && it.extension == "jar" }
+            .sortedBy { it.name }
+            .joinToString(File.pathSeparator) { it.absolutePath }
     }
 }

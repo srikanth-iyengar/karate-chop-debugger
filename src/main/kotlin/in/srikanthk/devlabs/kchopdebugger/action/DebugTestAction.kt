@@ -5,7 +5,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.actionSystem.DataKey
 import com.intellij.psi.PsiDocumentManager
-import com.intuit.karate.junit5.Karate
 import `in`.srikanthk.devlabs.kchopdebugger.language.KarateLanguage
 import `in`.srikanthk.devlabs.kchopdebugger.service.KarateExecutionService
 import java.util.concurrent.CompletableFuture
@@ -30,6 +29,13 @@ open class DebugTestAction : AnAction() {
         CompletableFuture.supplyAsync { executionService.executeSuite(file.path, scenarioName) }
     }
 
+    /**
+     * Enable and show the action only when the current editor's PSI file language is Karate.
+     *
+     * Sets the action presentation's enabledAndVisible flag to `true` when the open editor's PSI file
+     * language equals `KarateLanguage.INSTANCE`; otherwise sets it to `false`. If no editor or PSI file
+     * is available or an exception occurs, the action is disabled and hidden.
+     */
     override fun update(action: AnActionEvent) {
         try {
             val editor = action.getData(CommonDataKeys.EDITOR)

@@ -2,6 +2,7 @@ package in.srikanthk.devlabs.kchopdebugger.agent.communication;
 
 import in.srikanthk.devlabs.kchopdebugger.agent.DebugMessageBus;
 import in.srikanthk.devlabs.kchopdebugger.agent.DebuggerState;
+import in.srikanthk.devlabs.kchopdebugger.agent.KarateVariableSnapshot;
 import in.srikanthk.devlabs.kchopdebugger.agent.topic.DebugRequest;
 import in.srikanthk.devlabs.kchopdebugger.agent.topic.DebugResponse;
 import org.slf4j.Logger;
@@ -63,11 +64,25 @@ public class DebugClient extends DebugServer {
         this.subscriber = subscriberThread;
     }
 
+    /**
+     * Registers and subscribes a DebugResponse forwarder that forwards debugger callbacks to the remote endpoint.
+     *
+     * <p>The forwarder serializes RemoteCall objects to the client's socket output stream for the following callbacks:
+     * <ul>
+     *   <li>{@code updateKarateVariable} — forwards the provided map of variable snapshots.</li>
+     *   <li>{@code updateState} — forwards the debugger state.</li>
+     *   <li>{@code navigateTo} — forwards the file path and line number.</li>
+     *   <li>{@code appendLog} — forwards the log message and a success flag.</li>
+     *   <li>{@code evaluationResult} — forwards the evaluation result and any error string.</li>
+     * </ul>
+     *
+     * @throws IOException if creating the output stream to the socket fails
+     */
     public void registerForwarder() throws IOException {
         var requestForwarder = new DebugResponse() {
             ObjectOutputStream stream = new ObjectOutputStream(socket.getOutputStream());
             @Override
-            public void updateKarateVariable(HashMap<String, String> vars) {
+            public void updateKarateVariable(HashMap<String, KarateVariableSnapshot> vars) {
                 RemoteCall call = RemoteCall.builder().args(List.of(vars)).methodName("updateKarateVariable").build();
                 try {
                     stream.writeObject(call);

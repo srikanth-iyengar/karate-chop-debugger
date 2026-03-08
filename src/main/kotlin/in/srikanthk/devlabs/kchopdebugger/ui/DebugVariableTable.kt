@@ -22,6 +22,7 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.JBUI
 import `in`.srikanthk.devlabs.kchopdebugger.agent.DebuggerState
+import `in`.srikanthk.devlabs.kchopdebugger.agent.KarateVariableSnapshot
 import `in`.srikanthk.devlabs.kchopdebugger.topic.DebuggerInfoRequestTopic
 import `in`.srikanthk.devlabs.kchopdebugger.topic.DebuggerInfoResponseTopic
 import `in`.srikanthk.devlabs.kchopdebugger.topic.UIActionTopic
@@ -143,13 +144,22 @@ class DebugVariableTable(private val project: Project) : JPanel(BorderLayout()) 
 
         val messageBus = project.messageBus.connect()
         messageBus.subscribe(DebuggerInfoResponseTopic.TOPIC, object : DebuggerInfoResponseTopic {
-            override fun updateKarateVariables(vars: HashMap<String, Map<String, Object>>) {
+            /**
+             * Update the variable table and autocomplete trie from the provided Karate variable snapshots.
+             *
+             * Performs the update inside a write command action on the associated project: clears existing table rows,
+             * repopulates the table with each variable's name, type, and value, and adds variable names to the autocomplete trie.
+             * If the table was previously empty, triggers layout to resize the table.
+             *
+             * @param vars A map from variable name to its KarateVariableSnapshot (containing `type` and `value`) used to populate the table and trie.
+             */
+            override fun updateKarateVariables(vars: HashMap<String, KarateVariableSnapshot>) {
                 WriteCommandAction.runWriteCommandAction(project) {
                     val shouldResize = tableModel.rowCount == 0
                     tableModel.setNumRows(0)
                     updateTrieKeywords()
                     vars.entries.forEach {
-                        tableModel.addRow(arrayOf(it.key, it.value["type"], it.value["value"]))
+                        tableModel.addRow(arrayOf(it.key, it.value.type, it.value.value))
                         trie.addWord(it.key, ResultType.VARIABLE)
                     }
                     if (shouldResize) table.doLayout()

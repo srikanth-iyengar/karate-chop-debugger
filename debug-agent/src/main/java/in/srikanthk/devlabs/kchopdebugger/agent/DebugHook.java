@@ -1,7 +1,5 @@
 package in.srikanthk.devlabs.kchopdebugger.agent;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.karate.KarateException;
 import com.intuit.karate.RuntimeHook;
 import com.intuit.karate.Suite;
@@ -36,6 +34,14 @@ public class DebugHook implements RuntimeHook {
         responsePublisher.updateState(DebuggerState.Started);
     }
 
+    /**
+     * Decides whether execution should pause at the given step for debugger interaction and, when paused, publishes debugger state,
+     * navigation and variable snapshots and waits for remote debug commands (step into/over/out, resume, evaluate, hot-reload, step-back).
+     *
+     * @param step the current Step being executed
+     * @param sr the ScenarioRuntime for the current scenario (provides the script engine, actions, and scenario context)
+     * @return `true` to continue normal step processing, `false` to stop processing further steps (for example after a step-back)
+     */
     @Override
     public boolean beforeStep(Step step, ScenarioRuntime sr) {
         if (doingStepOver) {
@@ -66,14 +72,14 @@ public class DebugHook implements RuntimeHook {
         if ((shouldHalt || stopOnNextStep.get()) && !sessionState.isSkipBreakpoints()) {
             responsePublisher.navigateTo(filePath, startLine);
             responsePublisher.updateState(DebuggerState.Halted);
-            publishKarateVariablesSerializabel(sr.engine.vars);
+            publishKarateVariablesSerializable(sr.engine.vars);
             stopOnNextStep.set(false);
             CountDownLatch latch = new CountDownLatch(1);
 
             var listener = new DebugRequest() {
                 @Override
                 public void publishKarateVariables() {
-                    publishKarateVariablesSerializabel(sr.engine.vars);
+                    publishKarateVariablesSerializable(sr.engine.vars);
                 }
 
                 @Override
@@ -107,7 +113,7 @@ public class DebugHook implements RuntimeHook {
                     } catch (KarateException exception) {
                         responsePublisher.evaluationResult("", exception.getMessage());
                     } finally {
-                        publishKarateVariablesSerializabel(sr.engine.vars);
+                        publishKarateVariablesSerializable(sr.engine.vars);
                         sr.engine.setFailedReason(null);
                     }
                 }
@@ -130,7 +136,7 @@ public class DebugHook implements RuntimeHook {
                 @Override
                 public void hotReload() {
                     sr.hotReload();
-                    publishKarateVariablesSerializabel(sr.engine.vars);
+                    publishKarateVariablesSerializable(sr.engine.vars);
                 }
 
                 @Override
@@ -163,23 +169,39 @@ public class DebugHook implements RuntimeHook {
         return RuntimeHook.super.beforeStep(step, sr);
     }
 
-    public void publishKarateVariablesSerializabel(Map<String, Variable> vars) {
-        HashMap<String, String> mp = new HashMap<>();
-        ObjectMapper mapper = new ObjectMapper();
+    /**
+     * Create snapshots for the given Karate variables and publish them to the debug response channel.
+     *
+     * Builds a map of variable name to KarateVariableSnapshot (containing the variable's type and string value)
+     * and sends it via the configured DebugResponse publisher.
+     *
+     * @param vars map of variable names to their corresponding `Variable` instances to snapshot and publish
+     */
+    public void publishKarateVariablesSerializable(Map<String, Variable> vars) {
+        HashMap<String, KarateVariableSnapshot> snapshots = new HashMap<>();
         for (Map.Entry<String, Variable> entry : vars.entrySet()) {
-            Map<String, Object> varMap = new HashMap<>();
-            varMap.put("type", entry.getValue().type);
-            varMap.put("value", entry.getValue().getAsString());
-            try {
-                mp.put(entry.getKey(), mapper.writeValueAsString(varMap));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
+            snapshots.put(
+                    entry.getKey(),
+                    new KarateVariableSnapshot(
+                            String.valueOf(entry.getValue().type),
+                            entry.getValue().getAsString()
+                    )
+            );
         }
 
-        responsePublisher.updateKarateVariable(mp);
+        responsePublisher.updateKarateVariable(snapshots);
     }
 
+    /**
+     * Handles post-scenario debugger state updates for step-over and step-out operations.
+     *
+     * If the finished scenario matches the recorded step-over target, clears the step-over state
+     * and ensures the debugger will halt at the next step. If it matches the recorded step-out target,
+     * clears the step-out state and ensures the debugger will halt at the next step. Delegates to the
+     * superclass hook after updating state.
+     *
+     * @param sr the runtime information for the scenario that just finished
+     */
     @Override
     public void afterScenario(ScenarioRuntime sr) {
         if (doingStepOver) {

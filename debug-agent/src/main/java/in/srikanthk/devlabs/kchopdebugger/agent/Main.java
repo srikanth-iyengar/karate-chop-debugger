@@ -1,7 +1,5 @@
 package in.srikanthk.devlabs.kchopdebugger.agent;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.karate.Runner;
 import in.srikanthk.devlabs.kchopdebugger.agent.communication.DebugClient;
 import in.srikanthk.devlabs.kchopdebugger.agent.topic.DebugRequest;
@@ -24,13 +22,29 @@ import java.util.stream.Collectors;
 
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
-    private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final SessionState sessionState = SessionState.getInstance();
     private static final DebugResponse responsePublisher = DebugMessageBus.getInstance().publisher(DebugResponse.TOPIC);
 
+    /**
+     * Entrypoint for the debug agent that initializes session state, starts a debug client,
+     * and executes the test suite (optionally filtered by scenario).
+     *
+     * <p>Expects command-line arguments describing feature path, project base path, breakpoint file,
+     * classpath URLs, and whether to skip breakpoints. On successful completion exits with code 0.
+     * If the argument count is insufficient exits with code 1. On unexpected failures exits with code 2
+     * after publishing the error stack trace to the response publisher.</p>
+     *
+     * @param args command-line arguments in the following order:
+     *             0: featureClassPath — classpath location of feature files;
+     *             1: projectBasePath — project base directory used for reports and resolving paths;
+     *             2: breakpointsFile — path to a serialized breakpoint file to populate initial breakpoints;
+     *             3: classpathUrls — semicolon-separated list of JAR/file URLs added to the runtime classloader;
+     *             4: skipBreakpoints — boolean flag ("true"/"false") to ignore breakpoints when executing;
+     *             5: scenarioPattern (optional) — pattern to filter which scenario to execute.
+     */
     public static void main(String[] args) {
         if (args.length < 5) {
-            logger.error("Expected arguments: <featureClassPath> <projectBasePath> <breakpointsJson> <classpathUrls>");
+            logger.error("Expected arguments: <featureClassPath> <projectBasePath> <breakpointsFile> <classpathUrls> <skipBreakpoints> [scenarioPattern]");
             System.exit(1);
         }
         final String featureClassPath = args[0];
@@ -99,20 +113,26 @@ public class Main {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Initialize the global session state with feature path, project path, breakpoint data, and the skip-breakpoints flag.
+     *
+     * @param featurePath    classpath location (prefix-free) where feature files are located
+     * @param basePath       project base directory used for report output and path resolution
+     * @param breakpointPath filesystem path to a file containing serialized breakpoint data; decoded with BreakpointFileCodec
+     * @param skipBreakpoints if `true`, session state will be marked to ignore breakpoints during execution
+     * @throws IOException if the breakpoint file cannot be read
+     */
     private static void initializeSessionState(String featurePath, String basePath, String breakpointPath, boolean skipBreakpoints) throws IOException {
         sessionState.setFeatureClassPath(featurePath);
         sessionState.setProjectPath(basePath);
         sessionState.setSkipBreakpoints(skipBreakpoints);
 
-        String json = Files.readString(Path.of(breakpointPath), StandardCharsets.UTF_8);
-
-        Map<String, Object> breakpoints = objectMapper.readValue(json, new TypeReference<>() {
-        });
-        breakpoints.forEach((key, value) -> {
+        String serializedBreakpoints = Files.readString(Path.of(breakpointPath), StandardCharsets.UTF_8);
+        BreakpointFileCodec.decode(serializedBreakpoints).forEach((key, value) -> {
             if (key != null) {
                 sessionState.getBreakpoints()
-                        .computeIfAbsent(key, (k) -> new TreeSet<>())
-                        .addAll((Collection<Integer>) value);
+                        .computeIfAbsent(key, ignored -> new TreeSet<>())
+                        .addAll(value);
             }
         });
     }
