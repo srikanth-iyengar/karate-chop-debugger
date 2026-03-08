@@ -29,6 +29,10 @@
     <extensions defaultExtensionNs="com.intellij">
         <xdebugger.breakpointType implementation="in.srikanthk.devlabs.kchopdebugger.language.KarateDebugStepPoint" />
         <lang.commenter language="karate-dsl" implementationClass="in.srikanthk.devlabs.kchopdebugger.language.KarateCommenter" />
+        <lang.foldingBuilder
+                language="karate-dsl"
+                implementationClass="in.srikanthk.devlabs.kchopdebugger.language.KarateCodeFoldingBuilder"
+        />
         <toolWindow factoryClass="in.srikanthk.devlabs.kchopdebugger.ui.DebugToolWindowFactory"
                     id="Karate Chop Debugger" secondary="true" anchor="bottom"
                     icon="AllIcons.Toolwindows.ToolWindowInspection"/>
