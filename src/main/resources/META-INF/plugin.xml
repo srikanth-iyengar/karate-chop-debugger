@@ -68,6 +68,7 @@
         <annotator language="karate-dsl"
                    implementationClass="in.srikanthk.devlabs.kchopdebugger.language.annotator.KarateDescriptionAnnotator"
         />
+        <enterHandlerDelegate implementation="in.srikanthk.devlabs.kchopdebugger.language.KarateEnterHandler" order="first"/>
     </extensions>
     <projectListeners>
         <listener class="in.srikanthk.devlabs.kchopdebugger.listener.KarateBreakpointListener"
