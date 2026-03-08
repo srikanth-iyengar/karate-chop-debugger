@@ -1,7 +1,5 @@
 package in.srikanthk.devlabs.kchopdebugger.agent;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.karate.Runner;
 import in.srikanthk.devlabs.kchopdebugger.agent.communication.DebugClient;
 import in.srikanthk.devlabs.kchopdebugger.agent.topic.DebugRequest;
@@ -24,13 +22,12 @@ import java.util.stream.Collectors;
 
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
-    private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final SessionState sessionState = SessionState.getInstance();
     private static final DebugResponse responsePublisher = DebugMessageBus.getInstance().publisher(DebugResponse.TOPIC);
 
     public static void main(String[] args) {
         if (args.length < 5) {
-            logger.error("Expected arguments: <featureClassPath> <projectBasePath> <breakpointsJson> <classpathUrls>");
+            logger.error("Expected arguments: <featureClassPath> <projectBasePath> <breakpointsFile> <classpathUrls> <skipBreakpoints> [scenarioPattern]");
             System.exit(1);
         }
         final String featureClassPath = args[0];
@@ -104,15 +101,12 @@ public class Main {
         sessionState.setProjectPath(basePath);
         sessionState.setSkipBreakpoints(skipBreakpoints);
 
-        String json = Files.readString(Path.of(breakpointPath), StandardCharsets.UTF_8);
-
-        Map<String, Object> breakpoints = objectMapper.readValue(json, new TypeReference<>() {
-        });
-        breakpoints.forEach((key, value) -> {
+        String serializedBreakpoints = Files.readString(Path.of(breakpointPath), StandardCharsets.UTF_8);
+        BreakpointFileCodec.decode(serializedBreakpoints).forEach((key, value) -> {
             if (key != null) {
                 sessionState.getBreakpoints()
-                        .computeIfAbsent(key, (k) -> new TreeSet<>())
-                        .addAll((Collection<Integer>) value);
+                        .computeIfAbsent(key, ignored -> new TreeSet<>())
+                        .addAll(value);
             }
         });
     }

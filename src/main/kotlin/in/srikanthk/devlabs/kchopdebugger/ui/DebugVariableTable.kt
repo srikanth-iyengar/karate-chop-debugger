@@ -22,6 +22,7 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.JBUI
 import `in`.srikanthk.devlabs.kchopdebugger.agent.DebuggerState
+import `in`.srikanthk.devlabs.kchopdebugger.agent.KarateVariableSnapshot
 import `in`.srikanthk.devlabs.kchopdebugger.topic.DebuggerInfoRequestTopic
 import `in`.srikanthk.devlabs.kchopdebugger.topic.DebuggerInfoResponseTopic
 import `in`.srikanthk.devlabs.kchopdebugger.topic.UIActionTopic
@@ -143,13 +144,13 @@ class DebugVariableTable(private val project: Project) : JPanel(BorderLayout()) 
 
         val messageBus = project.messageBus.connect()
         messageBus.subscribe(DebuggerInfoResponseTopic.TOPIC, object : DebuggerInfoResponseTopic {
-            override fun updateKarateVariables(vars: HashMap<String, Map<String, Object>>) {
+            override fun updateKarateVariables(vars: HashMap<String, KarateVariableSnapshot>) {
                 WriteCommandAction.runWriteCommandAction(project) {
                     val shouldResize = tableModel.rowCount == 0
                     tableModel.setNumRows(0)
                     updateTrieKeywords()
                     vars.entries.forEach {
-                        tableModel.addRow(arrayOf(it.key, it.value["type"], it.value["value"]))
+                        tableModel.addRow(arrayOf(it.key, it.value.type, it.value.value))
                         trie.addWord(it.key, ResultType.VARIABLE)
                     }
                     if (shouldResize) table.doLayout()

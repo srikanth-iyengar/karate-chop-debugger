@@ -2,6 +2,7 @@ package in.srikanthk.devlabs.kchopdebugger.agent.communication;
 
 import in.srikanthk.devlabs.kchopdebugger.agent.DebugMessageBus;
 import in.srikanthk.devlabs.kchopdebugger.agent.DebuggerState;
+import in.srikanthk.devlabs.kchopdebugger.agent.KarateVariableSnapshot;
 import in.srikanthk.devlabs.kchopdebugger.agent.topic.DebugRequest;
 import in.srikanthk.devlabs.kchopdebugger.agent.topic.DebugResponse;
 import org.slf4j.Logger;
@@ -67,7 +68,7 @@ public class DebugClient extends DebugServer {
         var requestForwarder = new DebugResponse() {
             ObjectOutputStream stream = new ObjectOutputStream(socket.getOutputStream());
             @Override
-            public void updateKarateVariable(HashMap<String, String> vars) {
+            public void updateKarateVariable(HashMap<String, KarateVariableSnapshot> vars) {
                 RemoteCall call = RemoteCall.builder().args(List.of(vars)).methodName("updateKarateVariable").build();
                 try {
                     stream.writeObject(call);
