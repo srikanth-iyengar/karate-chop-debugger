@@ -83,12 +83,3 @@ tasks {
             .orElse("")
     }
 }
-
-tasks.named<ProcessResources>("processResources") {
-    dependsOn(":debug-agent:build")
-
-    from("debug-agent/build/libs/debug-agent-${project.version}.jar") {
-        into("lib")
-        rename { "agent.jar" }
-    }
-}

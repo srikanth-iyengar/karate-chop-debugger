@@ -4,6 +4,7 @@ import com.intellij.execution.impl.ConsoleViewImpl
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.project.Project
 import `in`.srikanthk.devlabs.kchopdebugger.agent.DebuggerState
+import `in`.srikanthk.devlabs.kchopdebugger.agent.KarateVariableSnapshot
 import `in`.srikanthk.devlabs.kchopdebugger.topic.DebuggerInfoResponseTopic
 import java.awt.BorderLayout
 import javax.swing.JPanel
@@ -27,7 +28,7 @@ class LogViewPanel(val project: Project) : JPanel(BorderLayout()) {
             override fun navigateTo(filepath: String, lineNumber: Int) {
             }
 
-            override fun updateKarateVariables(vars: HashMap<String, Map<String, Object>>) {
+            override fun updateKarateVariables(vars: HashMap<String, KarateVariableSnapshot>) {
             }
 
             override fun updateState(state: DebuggerState) {
